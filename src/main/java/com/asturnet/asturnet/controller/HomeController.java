@@ -6,14 +6,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
+    // Redirige la raíz "/" a la página de login
     @GetMapping("/")
-    public String index() {
-        return "index";  // Va a buscar src/main/resources/templates/index.html
+    public String redirectToLogin() {
+        return "redirect:/login";
     }
 
+    // Muestra la vista de login personalizada
     @GetMapping("/login")
     public String login() {
-        return "login"; // Puedes crear otro template login.html si quieres
+        return "login";  // Thymeleaf busca login.html en templates
     }
 }
+
 
