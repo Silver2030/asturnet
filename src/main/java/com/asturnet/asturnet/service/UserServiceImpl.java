@@ -2,50 +2,51 @@ package com.asturnet.asturnet.service;
 
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.model.PrivacyLevel;
-import com.asturnet.asturnet.repository.UserRepository; // Importa tu repositorio
-import org.springframework.security.crypto.password.PasswordEncoder; // Importa PasswordEncoder
+import com.asturnet.asturnet.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Para manejar transacciones
+import org.springframework.transaction.annotation.Transactional;
 
-@Service // Indica que esta clase es un componente de servicio de Spring
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // Inyectamos PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
-    // Inyección de dependencias a través del constructor
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    @Transactional // Indica que este método debe ejecutarse dentro de una transacción de base de datos
+    @Transactional
     public User registerNewUser(String username, String email, String password) {
-        // Validación básica (puedes expandirla más adelante)
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("El nombre de usuario ya existe."); // O una excepción personalizada
+            throw new RuntimeException("El nombre de usuario ya existe.");
         }
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("El email ya está registrado."); // O una excepción personalizada
+            throw new RuntimeException("El email ya está registrado.");
         }
 
         User newUser = new User();
         newUser.setUsername(username);
         newUser.setEmail(email);
-        // ¡Importante! Codifica la contraseña antes de guardarla en la base de datos
         newUser.setPassword(passwordEncoder.encode(password));
-        newUser.setBio(""); // Valores por defecto
-        newUser.setPhotoUrl(""); // Valores por defecto
-        newUser.setPrivacyLevel(PrivacyLevel.PUBLIC); // Valor por defecto
+        newUser.setBio("");
+        // Aseguramos que se establezcan los nuevos campos que tu BD espera
+        newUser.setFullName(""); // Inicializamos fullName
+        newUser.setProfilePictureUrl(""); // Inicializamos profilePictureUrl
 
-        return userRepository.save(newUser); // Guarda el nuevo usuario en la BD
+        newUser.setPrivacyLevel(PrivacyLevel.PUBLIC);
+        newUser.setIsPrivate(false); // Es NOT NULL en la DB, inicializamos a false por defecto
+
+        return userRepository.save(newUser);
     }
 
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado por nombre: " + username));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado por nombre de usuario: " + username));
     }
 
     @Override
