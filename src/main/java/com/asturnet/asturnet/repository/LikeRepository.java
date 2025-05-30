@@ -1,5 +1,5 @@
 package com.asturnet.asturnet.repository;
 
-public class UserRepository {
+public class LikeRepository {
     
 }
