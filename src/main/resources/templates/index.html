@@ -4,9 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido a AsturNet</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}"> </head>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Añadir algunos estilos básicos para los botones/enlaces en index.html */
+        .button-group {
+            margin-top: 30px;
+        }
+        .button-group a {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 0 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .button-group a.login-btn {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+        .button-group a.login-btn:hover {
+            background-color: #0056b3;
+        }
+        .button-group a.register-btn {
+            background-color: #28a745;
+            color: white;
+            border: 1px solid #28a745;
+        }
+        .button-group a.register-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
 <body>
     <h1>¡Hola, bienvenido a AsturNet!</h1>
     <p>Esta es tu aplicación de red social.</p>
-    <p th:text="${message}"></p> <script th:src="@{/js/main.js}"></script> </body>
+    <p th:text="${message}"></p>
+
+    <div class="button-group">
+        <a th:href="@{/login}" class="login-btn">Iniciar Sesión</a>
+        <a th:href="@{/register}" class="register-btn">Registrarse</a>
+    </div>
+
+    <script th:src="@{/js/main.js}"></script>
+</body>
 </html>
