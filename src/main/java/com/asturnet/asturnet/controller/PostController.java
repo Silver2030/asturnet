@@ -37,49 +37,6 @@ public class PostController {
         this.commentService = commentService; // <-- Asignamos CommentService
     }
 
-    @GetMapping("/home")
-    public String home(Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        User user = null;
-        Map<Long, Boolean> userLikesPost = new HashMap<>();
-        Map<Long, Long> postLikesCount = new HashMap<>();
-        // <-- IMPORTANTE: Mapa para los comentarios de cada post
-        Map<Long, List<Comment>> postComments = new HashMap<>();
-
-
-        if (currentUser != null) {
-            user = userService.findByUsername(currentUser.getUsername());
-            model.addAttribute("username", user.getUsername());
-            model.addAttribute("userId", user.getId());
-        }
-
-        List<Post> posts = postService.getAllPosts();
-        model.addAttribute("posts", posts);
-
-        if (user != null) {
-            for (Post post : posts) {
-                userLikesPost.put(post.getId(), likeService.isLikedByUser(user, post));
-                postLikesCount.put(post.getId(), likeService.getLikesCountForPost(post));
-                // <-- IMPORTANTE: Obtener comentarios para cada post
-                postComments.put(post.getId(), commentService.getCommentsByPost(post));
-            }
-        } else {
-            for (Post post : posts) {
-                postLikesCount.put(post.getId(), likeService.getLikesCountForPost(post));
-                // <-- IMPORTANTE: Obtener comentarios para cada post incluso si no hay usuario logueado
-                postComments.put(post.getId(), commentService.getCommentsByPost(post));
-            }
-        }
-        model.addAttribute("userLikesPost", userLikesPost);
-        model.addAttribute("postLikesCount", postLikesCount);
-        model.addAttribute("postComments", postComments); // <-- IMPORTANTE: Pasa el mapa de comentarios
-
-        model.addAttribute("postContent", "");
-        model.addAttribute("postImageUrl", "");
-        model.addAttribute("postVideoUrl", "");
-
-        return "home";
-    }
-
     @PostMapping("/posts/create")
     public String createPost(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("content") String content,
