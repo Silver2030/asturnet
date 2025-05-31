@@ -281,7 +281,7 @@
             margin-bottom: 8px;
         }
         .comment-actions {
-            text-align: right; /* Alinea el botón de eliminar a la derecha */
+            text-align: right;
         }
         .comment-delete-button {
             background-color: #ffc107; /* Amarillo para eliminar comentario */
@@ -311,4 +311,112 @@
             </div>
         </div>
 
-        <div th:if="<span class="math-inline">\{successMessage\}" class\="message success\-message"\>
+        <div th:if="${successMessage}" class="message success-message">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="message error-message">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <h2>¡Bienvenido, <span th:text="${username}"></span>!</h2>
+        <p>¿Qué tienes en mente hoy?</p>
+
+        <div class="post-form">
+            <h3>Crear nueva publicación</h3>
+            <form th:action="@{/posts/create}" method="post">
+                <textarea name="content" placeholder="Escribe algo..." th:value="${postContent}"></textarea>
+                <input type="text" name="imageUrl" placeholder="URL de la imagen (opcional)" th:value="${postImageUrl}">
+                <input type="text" name="videoUrl" placeholder="URL del video (opcional)" th:value="${postVideoUrl}">
+                <button type="submit">Publicar</button>
+            </form>
+        </div>
+
+        <h3>Publicaciones recientes</h3>
+        <div th:if="${posts.isEmpty()}">
+            <p>No hay publicaciones aún. ¡Sé el primero en publicar!</p>
+        </div>
+        <div th:each="post : ${posts}" class="post-card">
+            <div class="post-header">
+                <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                     th:src="${post.user.profilePictureUrl}"
+                     alt="Foto de perfil"
+                     class="profile-picture">
+                <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                     th:src="@{/images/default-profile.png}"
+                     alt="Foto de perfil por defecto"
+                     class="profile-picture">
+                <div class="post-author-info">
+                    <strong th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></strong>
+                    <span th:text="'@' + ${post.user.username}"></span>
+                </div>
+            </div>
+            <div class="post-content">
+                <p th:text="${post.content}"></p>
+            </div>
+            <div th:if="${post.imageUrl != null and post.imageUrl != ''}" class="post-media">
+                <img th:src="${post.imageUrl}" alt="Imagen de la publicación">
+            </div>
+            <div th:if="${post.videoUrl != null and post.videoUrl != ''}" class="post-media">
+                <video controls>
+                    <source th:src="${post.videoUrl}" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+            </div>
+            <div class="post-footer">
+                <div class="post-meta">
+                    <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                </div>
+                <div class="post-actions">
+                    <div sec:authorize="isAuthenticated()" class="like-info">
+                        <form th:action="@{/posts/toggleLike}" method="post" style="display:inline;">
+                            <input type="hidden" name="postId" th:value="${post.id}">
+                            <button type="submit"
+                                    th:classappend="${userLikesPost.get(post.id)} ? 'liked' : ''"
+                                    class="like-button">
+                                <span th:text="${userLikesPost.get(post.id)} ? 'Ya no me gusta' : 'Me gusta'"></span>
+                            </button>
+                        </form>
+                        <span th:text="${postLikesCount.get(post.id)} + ' likes'"></span>
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:if="${userId == post.user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                            <input type="hidden" name="postId" th:value="${post.id}">
+                            <button type="submit" class="delete-button">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comments-section">
+                <h4>Comentarios</h4>
+                <div sec:authorize="isAuthenticated()" class="comment-form">
+                    <form th:action="@{/comments/create}" method="post">
+                        <input type="hidden" name="postId" th:value="${post.id}">
+                        <textarea name="content" placeholder="Añade un comentario..." required></textarea>
+                        <button type="submit">Comentar</button>
+                    </form>
+                </div>
+
+                <div th:if="${postComments.get(post.id) != null and not postComments.get(post.id).isEmpty()}" class="comment-list">
+                    <div th:each="comment : ${postComments.get(post.id)}" class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author" th:text="${comment.user.fullName != null and comment.user.fullName != '' ? comment.user.fullName : comment.user.username}"></span>
+                            <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                        </div>
+                        <p class="comment-content-text" th:text="${comment.content}"></p>
+                        <div sec:authorize="isAuthenticated()" class="comment-actions">
+                            <form th:if="${userId == comment.user.id or userId == post.user.id}" th:action="@{/comments/delete}" method="post" style="display:inline;">
+                                <input type="hidden" name="commentId" th:value="${comment.id}">
+                                <button type="submit" class="comment-delete-button">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div th:unless="${postComments.get(post.id) != null and not postComments.get(post.id).isEmpty()}">
+                    <p>No hay comentarios aún.</p>
+                </div>
+            </div>
+        </div>
+        </div>
+</body>
+</html>
