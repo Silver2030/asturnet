@@ -1,7 +1,7 @@
 package com.asturnet.asturnet.controller;
 
 import com.asturnet.asturnet.model.Friends;
-import com.asturnet.asturnet.model.FriendshipStatus; // Asegúrate de que este enum está importado
+import com.asturnet.asturnet.model.FriendshipStatus; // Importa el enum FriendshipStatus
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.service.FriendsService;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList; // Necesario para 'new java.util.ArrayList<>()'
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +34,22 @@ public class ProfileController {
         this.postService = postService;
     }
 
-    // --- Método para ver el perfil de OTRO usuario ---
+    // --- Método para ver MI perfil ---
+    @GetMapping("/profile")
+    public String viewMyProfile(@AuthenticationPrincipal UserDetails currentUserDetails) {
+        if (currentUserDetails == null) {
+            return "redirect:/login"; // Si no hay usuario logueado, redirige al login
+        }
+        User currentUser = userService.findByUsername(currentUserDetails.getUsername());
+        if (currentUser == null) {
+            // Esto no debería ocurrir si el usuario está autenticado, pero es una buena medida de seguridad
+            return "redirect:/logout"; // O a una página de error
+        }
+        // Redirige a la URL con el nombre de usuario, que será manejada por viewOtherUserProfile
+        return "redirect:/profile/" + currentUser.getUsername();
+    }
+
+    // --- Método para ver el perfil de OTRO usuario (o el propio si se accede directamente con /profile/{username}) ---
     @GetMapping("/profile/{username}")
     public String viewOtherUserProfile(@PathVariable String username, Model model,
                                        @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -50,22 +66,23 @@ public class ProfileController {
             return "redirect:/home";
         }
 
-        if (currentUser.getId().equals(otherUser.getId())) {
-            return "redirect:/profile"; // Redirige al controlador del propio perfil (en UserController)
-        }
-
         model.addAttribute("user", otherUser);
-        model.addAttribute("isCurrentUser", false);
+        
+        // Determinar si el perfil que se está viendo es el del usuario autenticado
+        model.addAttribute("isCurrentUser", currentUser.getId().equals(otherUser.getId()));
 
-        // Lógica para determinar el estado de amistad
-        FriendshipStatus status = friendsService.getFriendshipStatus(currentUser, otherUser);
+        // Lógica para determinar el estado de amistad (solo si no es el usuario actual)
+        FriendshipStatus status = null;
+        if (!currentUser.getId().equals(otherUser.getId())) {
+            status = friendsService.getFriendshipStatus(currentUser, otherUser);
+        }
         model.addAttribute("friendshipStatus", status);
         model.addAttribute("isFriend", status == FriendshipStatus.ACCEPTED);
 
-        // Lógica para diferenciar si la solicitud pendiente fue enviada o recibida
+        // Lógica para diferenciar si la solicitud pendiente fue enviada o recibida (solo si no es el usuario actual)
         boolean sentPendingRequest = false;
         boolean receivedPendingRequest = false;
-        if (status == FriendshipStatus.PENDING) {
+        if (!currentUser.getId().equals(otherUser.getId()) && status == FriendshipStatus.PENDING) {
             Optional<Friends> friendship = friendsService.findFriendsBetween(currentUser, otherUser);
             if (friendship.isPresent()) {
                 if (friendship.get().getUser().getId().equals(currentUser.getId())) {
@@ -79,17 +96,18 @@ public class ProfileController {
         model.addAttribute("receivedPendingRequest", receivedPendingRequest);
 
         // Lógica para mostrar posts basada en la privacidad
-        if (otherUser.getIsPrivate() && status != FriendshipStatus.ACCEPTED) {
+        // Si el perfil es privado Y NO son amigos (o no es el propio usuario)
+        if (otherUser.getIsPrivate() && !currentUser.getId().equals(otherUser.getId()) && status != FriendshipStatus.ACCEPTED) {
             model.addAttribute("isPrivateAndNotFriend", true);
-            model.addAttribute("userPosts", new java.util.ArrayList<>());
+            model.addAttribute("userPosts", new ArrayList<>()); // No mostrar posts
         } else {
             model.addAttribute("isPrivateAndNotFriend", false);
-            // *** ¡CORRECCIÓN APLICADA AQUÍ! ***
             // Usamos el método getPostsByUser(User user) que ya existe en tu PostService
             List<Post> userPosts = postService.getPostsByUser(otherUser);
             model.addAttribute("userPosts", userPosts);
         }
 
+        // Manejo de mensajes flash
         if (model.containsAttribute("successMessage")) {
             model.addAttribute("successMessage", model.getAttribute("successMessage"));
         }
