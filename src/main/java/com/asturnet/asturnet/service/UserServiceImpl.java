@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional; // <-- ¡Importación necesaria para Optional!
 
 @Service
@@ -100,5 +101,13 @@ public class UserServiceImpl implements UserService {
         }
 
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> searchUsers(String query) {
+        // Implementa la lógica de búsqueda. Por ejemplo, buscar por username o fullName que contenga la query
+        // Necesitarás métodos en tu UserRepository para esto.
+        // Asumo que tu UserRepository tiene métodos como findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase
+        return userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(query, query);
     }
 }

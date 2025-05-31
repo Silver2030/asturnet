@@ -4,6 +4,7 @@ import com.asturnet.asturnet.model.User; // Importa tu entidad User
 import org.springframework.data.jpa.repository.JpaRepository; // Importa JpaRepository
 import org.springframework.stereotype.Repository; // Opcional, pero buena práctica para claridad
 
+import java.util.List;
 import java.util.Optional; // Importa Optional para manejar casos donde no se encuentra el usuario
 
 @Repository // Anotación opcional pero recomendada para indicar que es un componente de persistencia
@@ -16,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Método para buscar un usuario por su email.
     Optional<User> findByEmail(String email);
+
+    List<User> findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(String usernameQuery, String fullNameQuery);
 
     // Puedes añadir más métodos personalizados aquí si los necesitas, por ejemplo:
     // boolean existsByUsername(String username);

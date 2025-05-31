@@ -3,6 +3,7 @@ package com.asturnet.asturnet.service;
 import com.asturnet.asturnet.model.User; // Asegúrate de que esta importación esté presente
 import com.asturnet.asturnet.dto.UserProfileUpdateRequest; // Importa el nuevo DTO
 
+import java.util.List;
 import java.util.Optional; // Necesario para Optional<User>
 
 public interface UserService {
@@ -18,4 +19,5 @@ public interface UserService {
     User updateProfile(Long userId, UserProfileUpdateRequest request);
     // Puedes añadir más métodos según las necesidades:
     // void deleteUser(Long userId);
+    List<User> searchUsers(String query);
 }
