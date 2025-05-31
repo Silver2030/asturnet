@@ -29,6 +29,14 @@
             box-sizing: border-box; /* Incluye padding en el ancho total */
         }
 
+        /* Añade el estilo para .site-branding aquí también para que se vea igual que en home */
+        .site-branding {
+            flex-grow: 1;
+            text-align: left;
+            margin-right: 20px;
+            min-width: 150px;
+        }
+
         /* Nuevo estilo para el contenedor de AsturNet */
         .site-branding {
             flex-grow: 1; /* Permite que ocupe el espacio disponible */
@@ -373,7 +381,7 @@
         </div>
         <div class="user-actions">
             <a th:href="@{/home}" class="action-button">Inicio</a>
-            <a th:href="@{//profile}" class="action-button">Mi Perfil</a>
+            <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
             <a th:href="@{/search}" class="action-button">Buscar Usuarios</a>
             <a th:href="@{/friend-requests}" class="action-button">Solicitudes Recibidas</a>
             <form th:action="@{/logout}" method="post" style="display: inline-block;">
