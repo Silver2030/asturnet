@@ -14,11 +14,9 @@ import java.util.Optional; // <-- ¡Importación necesaria para Optional!
 @Service
 public class UserServiceImpl implements UserService {
 
-    // Declaración de UserRepository y PasswordEncoder
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Constructor para la inyección de dependencias
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -44,6 +42,8 @@ public class UserServiceImpl implements UserService {
 
         newUser.setPrivacyLevel(PrivacyLevel.PUBLIC);
         newUser.setIsPrivate(false); // Es NOT NULL en la DB, inicializamos a false por defecto
+        newUser.setIsBanned(false); // Por defecto, no baneado al registrar
+        newUser.setRole("ROLE_USER"); // Por defecto, rol de usuario
 
         return userRepository.save(newUser);
     }
@@ -60,23 +60,16 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado por email: " + email));
     }
 
-    // --- ¡NUEVOS MÉTODOS AÑADIDOS! ---
-
     @Override
     public Optional<User> findById(Long id) {
-        // JpaRepository ya tiene este método.
         return userRepository.findById(id);
     }
 
     @Override
-    @Transactional // Se recomienda para operaciones de escritura en DB
+    @Transactional
     public User updateUser(User user) {
-        // Simple delegación al repositorio para guardar un objeto User ya modificado.
-        // Aquí podrías añadir lógica de validación o negocio si fuera necesario antes de guardar.
         return userRepository.save(user);
     }
-
-    // --- MÉTODO updateProfile YA EXISTENTE ---
 
     @Override
     @Transactional
@@ -94,7 +87,6 @@ public class UserServiceImpl implements UserService {
             user.setFullName(request.getFullName());
         }
 
-        // Lógica para manejar la privacidad:
         if (request.getIsPrivate() != null) {
             user.setIsPrivate(request.getIsPrivate());
             user.setPrivacyLevel(request.getIsPrivate() ? PrivacyLevel.PRIVATE : PrivacyLevel.PUBLIC);
@@ -105,9 +97,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> searchUsers(String query) {
-        // Implementa la lógica de búsqueda. Por ejemplo, buscar por username o fullName que contenga la query
-        // Necesitarás métodos en tu UserRepository para esto.
-        // Asumo que tu UserRepository tiene métodos como findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase
         return userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(query, query);
+    }
+
+    // **NUEVOS MÉTODOS PARA EL BANEO AÑADIDOS AQUÍ**
+
+    @Override
+    @Transactional
+    public void banUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+        user.setIsBanned(true); // Establece el usuario como baneado
+        userRepository.save(user); // Guarda los cambios
+    }
+
+    @Override
+    @Transactional
+    public void unbanUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
+        user.setIsBanned(false); // Desbanea al usuario
+        userRepository.save(user);
     }
 }

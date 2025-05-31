@@ -55,7 +55,6 @@ public class HomeController {
 
                 // ***** APLICAR FILTRO AQUÍ *****
                 postsToShow = postService.getHomeFeedPosts(currentUser); // <--- ¡CAMBIO CLAVE!
-                System.out.println("Posts fetched for user " + currentUser.getUsername() + ": " + postsToShow.size()); // Depuración
             } else {
                 System.out.println("Current User not found in DB for principal: " + currentUsername);
                 model.addAttribute("username", "Invitado"); // Si el usuario no se encuentra en DB
@@ -83,11 +82,9 @@ public class HomeController {
             if (currentUser != null) { // Solo si hay un usuario autenticado para verificar likes
                 boolean userHasLiked = likeService.isLikedByUser(currentUser, post);
                 userLikesPost.put(post.getId(), userHasLiked);
-                System.out.println("  Post " + post.getId() + " - User " + currentUser.getId() + " liked: " + userHasLiked); // Depuración
             }
             long likesCount = likeService.getLikesCountForPost(post);
             postLikesCount.put(post.getId(), likesCount);
-            System.out.println("  Post " + post.getId() + " - Likes Count: " + likesCount); // Depuración
         }
 
         // Añadir los posts filtrados y los mapas de likes al modelo

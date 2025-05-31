@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${user.username} + ' - Perfil de Usuario - AsturNet'"></title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}"></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
     <style>
         /* Tus estilos CSS del antiguo view-profile.html aquí */
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
@@ -88,12 +89,10 @@
             }
         }
 
-
         .container { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .profile-header { margin-bottom: 25px; }
         .profile-picture { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #007bff; margin-bottom: 15px; background-color: #eee; }
         .profile-picture-small { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; } /* Nuevo estilo para posts */
-        /* Eliminado h1 de aquí porque ahora lo controlamos en .header-bar h1 */
         .username { font-size: 1.2em; color: #666; margin-bottom: 20px; }
         .profile-detail { text-align: left; margin-bottom: 15px; line-height: 1.6; }
         .profile-detail strong { display: inline-block; width: 120px; color: #555; }
@@ -115,11 +114,10 @@
         .action-button.cancel-request-button:hover { background-color: #e0a800; }
 
         .action-button.accept-request-button { background-color: #28a745; } /* Verde para aceptar */
-        .action-button.accept-request-button:hover { background-color: #218838; }
+        .action-button.accept-button:hover { background-color: #218838; }
 
         .action-button.decline-request-button, .action-button.remove-friend-button { background-color: #dc3545; } /* Rojo para rechazar/eliminar */
         .action-button.decline-request-button:hover, .action-button.remove-friend-button:hover { background-color: #c82333; }
-
 
         .user-posts-section { margin-top: 40px; text-align: left; }
         .user-posts-section h3 { text-align: center; margin-bottom: 20px; color: #333; }
@@ -134,6 +132,32 @@
         .message { padding: 12px; margin-bottom: 20px; border-radius: 5px; text-align: center; font-weight: bold; }
         .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* NUEVOS ESTILOS AÑADIDOS, SIGUIENDO TUS PATRONES */
+        /* Para el badge de usuario baneado, similar a private-badge */
+        .banned-badge {
+            background-color: #dc3545; /* Rojo para indicar baneo */
+            color: white; /* Texto blanco para contraste */
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* Para los botones de ban/unban, reutilizando .action-button y definiendo colores específicos */
+        .action-button.ban-button {
+            background-color: #dc3545; /* Rojo para banear */
+        }
+        .action-button.ban-button:hover {
+            background-color: #c82333;
+        }
+        .action-button.unban-button {
+            background-color: #28a745; /* Verde para desbanear */
+        }
+        .action-button.unban-button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -172,6 +196,7 @@
             <h1 th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}"></h1>
             <p class="username">@<span th:text="${user.username}"></span>
                 <span th:if="${user.isPrivate}" class="private-badge">Privado</span>
+                <span th:if="${user.isBanned}" class="banned-badge">Baneado</span>
             </p>
         </div>
 
@@ -179,6 +204,23 @@
             <a th:if="${isCurrentUser}" th:href="@{/profile/edit}" class="action-button">Editar Perfil</a>
 
             <div th:if="${!isCurrentUser}" class="friendship-actions">
+                <button type="button" class="action-button report-user-button"
+                        data-toggle="modal" data-target="#reportUserModal"
+                        th:if="${!isCurrentUser and !#authorization.expression('hasRole(''ROLE_ADMIN'')')}">
+                    Reportar Usuario
+                </button>
+
+                <div sec:authorize="hasRole('ROLE_ADMIN')" th:if="${!isCurrentUser}" style="display: inline-block;">
+                    <form th:action="${user.isBanned ? '/admin/users/unban' : '/admin/users/ban'}" method="post" style="display:inline;">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <button type="submit"
+                                th:classappend="${user.isBanned ? 'unban-button' : 'ban-button'}"
+                                class="action-button">
+                            <span th:text="${user.isBanned ? 'Desbanear Usuario' : 'Banear Usuario'}"></span>
+                        </button>
+                    </form>
+                </div>
+
                 <div th:switch="${friendshipStatus}">
                     <span th:case="${T(com.asturnet.asturnet.model.FriendshipStatus).NOT_FRIENDS}">
                         <form th:action="@{/friends/sendRequest}" method="post">
@@ -217,6 +259,43 @@
                     </span>
                     <span th:case="*">
                     </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="reportUserModal" tabindex="-1" role="dialog" aria-labelledby="reportUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reportUserModalLabel">Reportar Usuario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form th:action="@{/report/user}" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="reportedUserId" th:value="${user.id}">
+                            <div class="form-group">
+                                <label for="reportReason">Razón del Reporte:</label>
+                                <select class="form-control" id="reportReason" name="reason" required>
+                                    <option value="">Selecciona una razón</option>
+                                    <option value="ACOSO">Acoso o Intimidación</option>
+                                    <option value="SPAM">Spam o Contenido Comercial no Deseado</option>
+                                    <option value="SUPLANTACION">Suplantación de Identidad</option>
+                                    <option value="CONTENIDO_INAPROPIADO">Contenido Inapropiado</option>
+                                    <option value="OTRO">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reportDescription">Descripción (opcional):</label>
+                                <textarea class="form-control" id="reportDescription" name="description" rows="3" placeholder="Detalles adicionales sobre el reporte..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-danger">Enviar Reporte</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -324,5 +403,8 @@
             <a th:href="@{/home}" class="action-button">Volver al Inicio</a>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -6,16 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections; // Para Collections.singletonList
 
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,22 +37,21 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // Cambiado de photo_url a profile_picture_url para coincidir con la BD
     @Column(name = "profile_picture_url", columnDefinition = "TEXT")
     private String profilePictureUrl;
 
-    // Nuevo campo: full_name (no es nullable en DB)
-    @Column(name = "full_name", length = 255) // Según tu imagen, no es NOT NULL
+    @Column(name = "full_name", length = 255)
     private String fullName;
 
-    // Columna para el nivel de privacidad (enum)
     @Enumerated(EnumType.STRING)
     @Column(name = "privacy_level", nullable = false, length = 20)
-    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC; // Valor por defecto
+    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC; // Asumo que tienes este Enum
 
-    // Campo is_private (BOOLEAN NOT NULL en DB)
     @Column(name = "is_private", nullable = false)
-    private Boolean isPrivate = false; // Valor por defecto en la entidad para evitar nulls
+    private Boolean isPrivate = false;
+
+    @Column(name = "is_banned", nullable = false)
+    private Boolean isBanned = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -58,5 +61,56 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ... (tus relaciones OneToMany, etc., si las tienes)
+    // Tu campo de rol único
+    @Column(nullable = false, length = 20)
+    private String role = "ROLE_USER";
+
+    // Constructor con campos obligatorios
+    public User(String username, String email, String password, String role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.isBanned = false;
+        this.isPrivate = false;
+        this.privacyLevel = PrivacyLevel.PUBLIC;
+    }
+
+    // --- Implementación de los métodos de UserDetails ---
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(this.role));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        boolean enabled = !this.isBanned;
+        System.out.println("DEBUG: isEnabled() called for user " + this.username + ". isBanned in entity: " + this.isBanned + ". Resulting enabled state: " + enabled);
+        return enabled;
+    }
 }

@@ -1,7 +1,8 @@
 package com.asturnet.asturnet.model;
 
 public enum ReportStatus {
-    PENDING,   // El reporte ha sido creado y está pendiente de revisión
-    REVIEWED,  // El reporte ha sido revisado (acción tomada o no)
-    DISMISSED  // El reporte ha sido desestimado (no se ha tomado ninguna acción)
+    PENDING,    // Reporte recién creado, esperando revisión
+    REVIEWED,   // Reporte ha sido visto por un admin, pero no resuelto/desestimado
+    RESOLVED,   // Acción tomada (ej. usuario baneado, post borrado)
+    DISMISSED   // Reporte desestimado (ej. no es válido, no hay acción necesaria)
 }

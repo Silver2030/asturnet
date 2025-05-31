@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Detalles del Reporte - ID: [[${report.id}]]</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/main.css">
+    <style>
+        /* Estilos generales del body */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* Estilos del header-bar */
+        .header-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .site-branding {
+            flex-grow: 1;
+            text-align: left;
+            margin-right: 20px;
+            min-width: 150px;
+        }
+
+        .header-bar h1 {
+            margin: 0;
+            font-size: 2.2em;
+            color: white;
+        }
+
+        .header-bar .user-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        /* Estilos de botones generales en el header */
+        .header-bar .action-button,
+        .header-bar .logout-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+        .header-bar .action-button {
+            background-color: #0056b3;
+            color: white;
+        }
+        .header-bar .action-button:hover {
+            background-color: #004085;
+        }
+        .header-bar .logout-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .header-bar .logout-button:hover {
+            background-color: #c82333;
+        }
+
+        /* Media query para pantallas pequeñas (ej. móviles) */
+        @media (max-width: 768px) {
+            .header-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .site-branding {
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100%;
+                text-align: center;
+            }
+            .header-bar h1 {
+                font-size: 1.8em;
+            }
+            .header-bar .user-actions {
+                width: 100%;
+                justify-content: center;
+                gap: 10px;
+            }
+            .header-bar .action-button,
+            .header-bar .logout-button {
+                flex-grow: 1;
+                max-width: calc(50% - 5px);
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="header-bar" th:fragment="navbar"> 
+        <div class="site-branding">
+      <h1>AsturNet</h1>
+    </div>
+    <div class="user-actions">
+      <a th:href="@{/home}" class="action-button">Inicio</a>
+      <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
+      <a th:href="@{/search}" class="action-button">Buscar Usuarios</a>
+      <a th:href="@{/friend-requests}" class="action-button">Solicitudes Recibidas</a>
+
+      <a th:href="@{/admin/reports}" class="action-button" sec:authorize="hasRole('ADMIN')">Administrar Reportes</a>
+
+      <form th:action="@{/logout}" method="post" style="display: inline-block;">
+        <button type="submit" class="logout-button">Cerrar Sesión</button>
+      </form>
+    </div>
+  </div>
+  <div class="container mt-4">
+    <h2 class="mb-4">Detalles del Reporte ID: <span th:text="${report.id}"></span></h2>
+
+    <div th:if="${successMessage}" class="alert alert-success" role="alert">
+      <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+      <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        Información del Reporte
+      </div>
+      <div class="card-body">
+        <p><strong>Reportero:</strong>
+          <span th:if="${report.reporter != null}">
+            <a th:href="@{/profile/{username}(username=${report.reporter.username})}" th:text="${report.reporter.username}"></a>
+          </span>
+          <span th:unless="${report.reporter != null}">N/A</span>         </p>
+        <p><strong>Usuario Reportado:</strong>
+          <span th:if="${report.reportedUser != null}">
+            <a th:href="@{/profile/{username}(username=${report.reportedUser.username})}" th:text="${report.reportedUser.username}"></a>
+            <span th:if="${report.reportedUser.isBanned}" class="badge badge-danger ml-2">Baneado</span>
+          </span>
+          <span th:unless="${report.reportedUser != null}">N/A</span>
+        </p>
+        <p th:if="${report.reportedPost != null}">
+          <strong>Post Reportado ID:</strong> <span th:text="${report.reportedPost.id}"></span>
+        </p>
+        <p><strong>Razón:</strong> <span th:text="${report.reason}"></span></p>
+        <p><strong>Fecha del Reporte:</strong> <span th:text="${#temporals.format(report.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+        <p><strong>Estado Actual:</strong> <span th:text="${report.status.name()}"></span></p>
+        <p th:if="${report.resolvedBy != null and !report.resolvedBy.isEmpty()}"><strong>Resuelto por:</strong> <span th:text="${report.resolvedBy}"></span></p>
+        <p th:if="${report.reviewedAt != null}"><strong>Fecha de Revisión/Resolución:</strong> <span th:text="${#temporals.format(report.reviewedAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+        <p th:if="${report.adminNotes != null and !report.adminNotes.isEmpty()}">
+          <strong>Notas del Administrador:</strong> <br><pre th:text="${report.adminNotes}"></pre>
+        </p>
+      </div>
+    </div>
+
+    <h3 class="mt-4">Acciones de Administración</h3>
+    <div class="card mt-3">
+      <div class="card-header">
+        Actualizar Estado y Notas del Reporte
+      </div>
+      <div class="card-body">
+        <form th:action="@{/admin/reports/{id}/update-status(id=${report.id})}" method="post">
+          <div class="form-group">
+            <label for="statusSelect">Nuevo Estado:</label>
+            <select class="form-control" id="statusSelect" name="status">
+              <option th:each="status : ${T(com.asturnet.asturnet.model.ReportStatus).values()}"
+                  th:value="${status}" th:text="${status.name()}"
+                  th:selected="${report.status.equals(status)}">PENDING</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="adminNotes">Notas del Administrador:</label>
+            <textarea class="form-control" id="adminNotes" name="adminNotes" rows="3"></textarea>
+            <small class="form-text text-muted">Las notas existentes se conservarán y las nuevas se añadirán.</small>
+          </div>
+          <button type="submit" class="btn btn-primary">Actualizar Reporte</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3" th:if="${report.reportedUser != null}">
+      <div class="card-header">
+        Acciones sobre el Usuario Reportado
+      </div>
+      <div class="card-body">
+        <form th:action="@{/admin/users/ban}" method="post" style="display:inline;">
+            <input type="hidden" name="userId" th:value="${report.reportedUser.id}">
+            <input type="hidden" name="reason" th:value="'Reporte procesado: ' + ${report.id}">
+            <button type="submit" class="btn btn-danger mr-2"
+                    th:if="${!report.reportedUser.isBanned}"
+                    th:onclick="`return confirm('¿Estás seguro de que quieres BANEAR al usuario ' + '${report.reportedUser.username}' + '? Esta acción es grave.');`"> Banear Usuario (<span th:text="${report.reportedUser.username}"></span>)
+            </button>
+        </form>
+
+        <form th:action="@{/admin/users/unban}" method="post" style="display:inline;">
+          <input type="hidden" name="userId" th:value="${report.reportedUser.id}">
+          <button type="submit" class="btn btn-warning"
+              th:if="${report.reportedUser.isBanned}"
+              th:onclick=" 'return confirm(\'¿Estás seguro de que quieres DESBANEAR al usuario ' + ${report.reportedUser.username} + '?\');' "> Desbanear Usuario (<span th:text="${report.reportedUser.username}"></span>)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3" th:if="${report.reportedPost != null}">
+      <div class="card-header">
+        Acciones sobre la Publicación Reportada
+      </div>
+      <div class="card-body">
+        <form th:action="@{/admin/posts/delete}" method="post" style="display:inline;">
+          <input type="hidden" name="postId" th:value="${report.reportedPost.id}">
+          <button type="submit" class="btn btn-danger"
+              th:onclick=" 'return confirm(\'¿Estás seguro de que quieres ELIMINAR este post (ID: ' + ${report.reportedPost.id} + ')?\');' "> Eliminar Post (<span th:text="${report.reportedPost.id}"></span>)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <a th:href="@{/admin/reports}" class="btn btn-secondary mt-3">Volver a la lista de reportes</a>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

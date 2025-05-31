@@ -20,30 +20,31 @@ public class Report {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporter_id", nullable = false) // El usuario que realiza el reporte
+    @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_user_id") // El usuario reportado (puede ser nulo si se reporta un post)
+    @ManyToOne(fetch = FetchType.EAGER) // <--- ¡CAMBIO AQUÍ!
+    @JoinColumn(name = "reported_user_id")
     private User reportedUser;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_post_id") // El post reportado (puede ser nulo si se reporta un usuario)
+    @ManyToOne(fetch = FetchType.LAZY) // Puedes dejar este en LAZY si no siempre necesitas el Post
+    @JoinColumn(name = "reported_post_id")
     private Post reportedPost;
 
-    @Column(columnDefinition = "TEXT", nullable = false) // Razón o descripción del reporte
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String reason;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING) // Estado del reporte
-    private ReportStatus status = ReportStatus.PENDING; // Valor por defecto
+    @Enumerated(EnumType.STRING)
+    private ReportStatus status = ReportStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // Puedes añadir un campo para la revisión del admin si lo deseas, ej:
-    // @Column(columnDefinition = "TEXT")
-    // private String adminNotes;
-    // private LocalDateTime reviewedAt;
+    @Column(columnDefinition = "TEXT")
+    private String adminNotes;
+
+    private String resolvedBy;
+    private LocalDateTime reviewedAt;
 }

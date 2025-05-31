@@ -1,0 +1,90 @@
+package com.asturnet.asturnet.service;
+
+import com.asturnet.asturnet.model.Post;
+import com.asturnet.asturnet.model.Report;
+import com.asturnet.asturnet.model.ReportStatus;
+import com.asturnet.asturnet.model.User;
+import com.asturnet.asturnet.repository.ReportRepository;
+import com.asturnet.asturnet.repository.UserRepository;
+import com.asturnet.asturnet.repository.PostRepository; // Asegúrate de tener este repo si manejas Posts
+import com.asturnet.asturnet.service.ReportService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ReportServiceImpl implements ReportService {
+
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository; // Asegúrate de tener este repo si manejas Posts
+
+    public ReportServiceImpl(ReportRepository reportRepository, UserRepository userRepository, PostRepository postRepository) {
+        this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
+        this.postRepository = postRepository;
+    }
+
+    @Override
+    @Transactional
+    public Report submitUserReport(Long reporterId, Long reportedUserId, String reason) {
+        User reporter = userRepository.findById(reporterId)
+                .orElseThrow(() -> new RuntimeException("Reporter not found with ID: " + reporterId));
+        User reported = userRepository.findById(reportedUserId)
+                .orElseThrow(() -> new RuntimeException("Reported user not found with ID: " + reportedUserId));
+
+        Report report = new Report();
+        report.setReporter(reporter);
+        report.setReportedUser(reported);
+        report.setReason(reason);
+        report.setStatus(ReportStatus.PENDING);
+        return reportRepository.save(report);
+    }
+
+    @Override
+    @Transactional
+    public Report submitPostReport(Long reporterId, Long reportedPostId, String reason) {
+        User reporter = userRepository.findById(reporterId)
+                .orElseThrow(() -> new RuntimeException("Reporter not found with ID: " + reporterId));
+        Post reportedPost = postRepository.findById(reportedPostId)
+                .orElseThrow(() -> new RuntimeException("Reported post not found with ID: " + reportedPostId));
+
+        Report report = new Report();
+        report.setReporter(reporter);
+        report.setReportedPost(reportedPost);
+        report.setReason(reason);
+        report.setStatus(ReportStatus.PENDING);
+        return reportRepository.save(report);
+    }
+
+    @Override
+    public List<Report> findAllReports() {
+        return reportRepository.findAll();
+    }
+
+    @Override
+    public Optional<Report> findReportById(Long id) {
+        return reportRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public void updateReportStatus(Long reportId, ReportStatus newStatus, String adminUsername, String adminNotes) {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Reporte no encontrado con ID: " + reportId));
+
+        report.setStatus(newStatus);
+        report.setResolvedBy(adminUsername);
+        report.setReviewedAt(LocalDateTime.now());
+
+        String currentAdminNotes = report.getAdminNotes();
+        report.setAdminNotes(currentAdminNotes != null && !currentAdminNotes.isEmpty() ?
+                             currentAdminNotes + "\n[" + LocalDateTime.now() + " by " + adminUsername + "] " + newStatus.name() + " notes: " + (adminNotes != null ? adminNotes : "") :
+                             "[" + LocalDateTime.now() + " by " + adminUsername + "] " + newStatus.name() + " notes: " + (adminNotes != null ? adminNotes : ""));
+
+        reportRepository.save(report);
+    }
+}
