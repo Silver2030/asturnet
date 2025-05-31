@@ -2,8 +2,8 @@ package com.asturnet.asturnet.service;
 
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.model.PrivacyLevel;
-import com.asturnet.asturnet.repository.UserRepository;
-import com.asturnet.asturnet.dto.UserProfileUpdateRequest; // Importa el nuevo DTO
+import com.asturnet.asturnet.repository.UserRepository; // Asegúrate de que esta importación exista
+import com.asturnet.asturnet.dto.UserProfileUpdateRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserServiceImpl implements UserService {
 
+    // Declaración de UserRepository y PasswordEncoder
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // Constructor para la inyección de dependencias
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -34,10 +36,11 @@ public class UserServiceImpl implements UserService {
         newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setBio("");
-        newUser.setFullName("");
-        newUser.setProfilePictureUrl("");
+        newUser.setFullName(""); // Inicializamos fullName
+        newUser.setProfilePictureUrl(""); // Inicializamos profilePictureUrl
+
         newUser.setPrivacyLevel(PrivacyLevel.PUBLIC);
-        newUser.setIsPrivate(false);
+        newUser.setIsPrivate(false); // Es NOT NULL en la DB, inicializamos a false por defecto
 
         return userRepository.save(newUser);
     }
@@ -60,7 +63,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
 
-        // Actualiza los campos solo si no son nulos en la solicitud
         if (request.getBio() != null) {
             user.setBio(request.getBio());
         }
@@ -70,13 +72,13 @@ public class UserServiceImpl implements UserService {
         if (request.getFullName() != null) {
             user.setFullName(request.getFullName());
         }
-        if (request.getPrivacyLevel() != null) {
-            user.setPrivacyLevel(request.getPrivacyLevel());
-        }
+
+        // Lógica para manejar la privacidad:
         if (request.getIsPrivate() != null) {
             user.setIsPrivate(request.getIsPrivate());
+            user.setPrivacyLevel(request.getIsPrivate() ? PrivacyLevel.PRIVATE : PrivacyLevel.PUBLIC);
         }
 
-        return userRepository.save(user); // Guarda los cambios
+        return userRepository.save(user);
     }
 }

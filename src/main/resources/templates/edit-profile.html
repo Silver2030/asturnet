@@ -115,18 +115,7 @@
                 <label for="profilePictureUrl">URL de Foto de Perfil:</label>
                 <input type="text" id="profilePictureUrl" name="profilePictureUrl" th:value="${user.profilePictureUrl}">
             </div>
-
-            <div class="form-group">
-                <label for="privacyLevel">Nivel de Privacidad:</label>
-                <select id="privacyLevel" name="privacyLevel">
-                    <option th:each="level : ${T(com.asturnet.asturnet.model.PrivacyLevel).values()}"
-                            th:value="${level}"
-                            th:text="${level.name()}"
-                            th:selected="${user.privacyLevel == level}">
-                    </option>
-                </select>
-            </div>
-
+            
             <div class="form-group">
                 <input type="checkbox" id="isPrivate" name="isPrivate" th:checked="${user.isPrivate}">
                 <label for="isPrivate">Marcar perfil como privado</label>
