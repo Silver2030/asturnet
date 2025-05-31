@@ -21,6 +21,7 @@ public interface FriendsRepository extends JpaRepository<Friends, Long> {
     // Métodos para obtener listas de amistades basadas en el rol del usuario en la relación
     List<Friends> findByUserAndStatus(User user, FriendshipStatus status);
     List<Friends> findByFriendAndStatus(User friend, FriendshipStatus status);
+    Optional<Friends> findByRequesterAndReceiver(User requester, User receiver);
 
     // NOTA: findByFriendAndUser(User user1, User user2) ya no es necesario si usas findByUserAndFriend(user2, user1)
     // NOTA: findByUserOrFriendAndStatus(User user, User user, FriendshipStatus status) no es un método JPA estándar para "OR" con la misma entidad en ambos lados.

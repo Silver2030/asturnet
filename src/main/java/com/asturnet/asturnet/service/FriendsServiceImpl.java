@@ -139,24 +139,28 @@ public class FriendsServiceImpl implements FriendsService {
         friendsRepository.delete(friends);
     }
 
-    @Override
-    public FriendshipStatus getFriendshipStatus(User currentUser, User otherUser) {
-        if (currentUser.getId().equals(otherUser.getId())) {
-            // Si es el mismo usuario, no hay un "estado de amistad" con uno mismo.
-            // Puedes devolver NOT_FRIENDS o incluso considerar añadir un estado SELF
-            // al enum FriendshipStatus si lo necesitas para otras lógicas.
-            // Para la UI actual, `th:if="${!isCurrentUser}"` ya lo oculta.
-            return FriendshipStatus.NOT_FRIENDS;
+    public FriendshipStatus getFriendshipStatus(User user1, User user2) {
+        if (user1 == null || user2 == null) {
+            return FriendshipStatus.NOT_FRIENDS; // O lanza una excepción, dependiendo de tu lógica de negocio
         }
 
-        Optional<Friends> friendsOptional = findFriendsBetween(currentUser, otherUser);
-
-        if (friendsOptional.isPresent()) {
-            Friends friends = friendsOptional.get();
-            return friends.getStatus();
+        if (user1.getId().equals(user2.getId())) {
+            return FriendshipStatus.ACCEPTED; // O un estado especial como SELF, si prefieres. Para posts, si eres tú, siempre es ACCEPTED
         }
-        // Si no hay una entrada en la base de datos, significa que no son amigos.
-        return FriendshipStatus.NOT_FRIENDS; // <-- ¡ESTA ES LA LÍNEA CRUCIAL A CAMBIAR!
+
+        // Buscar si user1 envió solicitud a user2
+        Optional<Friends> request1to2 = friendsRepository.findByRequesterAndReceiver(user1, user2);
+        if (request1to2.isPresent()) {
+            return request1to2.get().getStatus(); // PENDING o ACCEPTED
+        }
+
+        // Buscar si user2 envió solicitud a user1 (es decir, user1 recibió solicitud de user2)
+        Optional<Friends> request2to1 = friendsRepository.findByRequesterAndReceiver(user2, user1);
+        if (request2to1.isPresent()) {
+            return request2to1.get().getStatus(); // PENDING o ACCEPTED
+        }
+
+        return FriendshipStatus.NOT_FRIENDS; // No hay relación de amistad
     }
 
     @Override
