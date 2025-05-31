@@ -35,4 +35,6 @@ public interface FriendsService {
     void cancelFriendRequest(User sender, User receiver);
 
     List<User> getAcceptedFriends(User user);
+
+    Optional<Friends> findByUserAndFriend(User user, User friend);
 }
