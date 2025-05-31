@@ -317,9 +317,9 @@
         <div class="header-bar">
             <h1>AsturNet</h1>
             <div class="user-actions">
-                <a th:href="@{/profile/edit}" class="action-button">Editar Perfil</a>
-                <a th:href="@{/profile}" class="action-button">Ver Mi Perfil</a>
-                <form th:action="@{/logout}" method="post" style="display: inline-block;">
+                <a th:href="@{/home}" class="action-button">Inicio</a>
+                <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
+                <a th:href="@{/search}" class="action-button">Buscar Usuarios</a> <form th:action="@{/logout}" method="post" style="display: inline-block;">
                     <button type="submit" class="logout-button">Cerrar Sesión</button>
                 </form>
             </div>
@@ -335,16 +335,6 @@
         <h2>¡Bienvenido, <span th:text="${username}"></span>!</h2>
         <p>¿Qué tienes en mente hoy?</p>
 
-        <div class="header-bar">
-            <h1>AsturNet</h1>
-            <div class="user-actions">
-                <a th:href="@{/home}" class="action-button">Inicio</a>
-                <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
-                <a th:href="@{/search}" class="action-button">Buscar Usuarios</a> <form th:action="@{/logout}" method="post" style="display: inline-block;">
-                    <button type="submit" class="logout-button">Cerrar Sesión</button>
-                </form>
-            </div>
-        </div>
         <div class="post-form">
             <h3>Crear nueva publicación</h3>
             <form th:action="@{/posts/create}" method="post">

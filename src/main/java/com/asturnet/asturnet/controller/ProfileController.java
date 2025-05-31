@@ -160,10 +160,14 @@ public class ProfileController {
         return "redirect:/home";
     }
 
+// En tu ProfileController.java
+// ...
+
     @PostMapping("/friends/acceptRequest")
     public String acceptFriendRequest(@RequestParam("requesterId") Long requesterId,
                                       @AuthenticationPrincipal UserDetails currentUserDetails,
-                                      RedirectAttributes redirectAttributes) {
+                                      RedirectAttributes redirectAttributes,
+                                      @RequestParam(value = "fromRequestsPage", defaultValue = "false") boolean fromRequestsPage) { // <-- NUEVO PARÁMETRO
         try {
             User acceptor = userService.findByUsername(currentUserDetails.getUsername());
             User requester = userService.findById(requesterId)
@@ -173,17 +177,23 @@ public class ProfileController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al aceptar solicitud: " + e.getMessage());
         }
-        User requesterUser = userService.findById(requesterId).orElse(null);
-        if (requesterUser != null) {
-            return "redirect:/profile/" + requesterUser.getUsername();
+
+        if (fromRequestsPage) { // Si la acción vino de la página de solicitudes
+            return "redirect:/friend-requests"; // Redirige de vuelta a la lista de solicitudes
+        } else { // Si vino de un perfil
+            User requesterUser = userService.findById(requesterId).orElse(null);
+            if (requesterUser != null) {
+                return "redirect:/profile/" + requesterUser.getUsername();
+            }
+            return "redirect:/profile"; // Fallback
         }
-        return "redirect:/profile";
     }
 
     @PostMapping("/friends/declineRequest")
     public String declineFriendRequest(@RequestParam("requesterId") Long requesterId,
                                        @AuthenticationPrincipal UserDetails currentUserDetails,
-                                       RedirectAttributes redirectAttributes) {
+                                       RedirectAttributes redirectAttributes,
+                                       @RequestParam(value = "fromRequestsPage", defaultValue = "false") boolean fromRequestsPage) { // <-- NUEVO PARÁMETRO
         try {
             User decliner = userService.findByUsername(currentUserDetails.getUsername());
             User requester = userService.findById(requesterId)
@@ -193,11 +203,16 @@ public class ProfileController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al rechazar solicitud: " + e.getMessage());
         }
-        User requesterUser = userService.findById(requesterId).orElse(null);
-        if (requesterUser != null) {
-            return "redirect:/profile/" + requesterUser.getUsername();
+
+        if (fromRequestsPage) { // Si la acción vino de la página de solicitudes
+            return "redirect:/friend-requests"; // Redirige de vuelta a la lista de solicitudes
+        } else { // Si vino de un perfil
+            User requesterUser = userService.findById(requesterId).orElse(null);
+            if (requesterUser != null) {
+                return "redirect:/profile/" + requesterUser.getUsername();
+            }
+            return "redirect:/profile"; // Fallback
         }
-        return "redirect:/profile";
     }
 
     @PostMapping("/friends/removeFriend")
