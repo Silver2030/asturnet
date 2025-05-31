@@ -3,6 +3,7 @@ package com.asturnet.asturnet.repository;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User; // Necesitamos User para el método findByUser
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -13,4 +14,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Método para encontrar todos los posts, ordenados por fecha de creación descendente (para el feed general)
     List<Post> findByOrderByCreatedAtDesc();
+
+    @Query("SELECT p FROM Post p JOIN FETCH p.user LEFT JOIN FETCH p.comments ORDER BY p.createdAt DESC")
+    List<Post> findAllWithUserAndCommentsOrderedByCreatedAtDesc();
 }

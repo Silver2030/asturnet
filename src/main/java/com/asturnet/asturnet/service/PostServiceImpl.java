@@ -6,7 +6,9 @@ import com.asturnet.asturnet.repository.PostRepository; // Importa el repositori
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Para manejar transacciones
 
+import java.time.LocalDateTime; // Necesitarás esto si el createPost lo usas para setear la fecha
 import java.util.List;
+import java.util.Optional; // Puedes necesitarlo para getPostById si lo manejas así
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -28,6 +30,9 @@ public class PostServiceImpl implements PostService {
         post.setContent(content);
         post.setImageUrl(imageUrl);
         post.setVideoUrl(videoUrl);
+        // Asegúrate de setear las fechas aquí si no lo haces en el constructor del Post
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
         return postRepository.save(post); // Guarda el post en la base de datos
     }
 
@@ -61,4 +66,13 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post); // Elimina el post
     }
 
+    // *** AÑADE ESTE BLOQUE: IMPLEMENTACIÓN DEL NUEVO MÉTODO ***
+    @Override
+    @Transactional(readOnly = true) // Importante para la carga perezosa y fetch joins
+    public List<Post> getAllPostsWithUserAndComments() {
+        return postRepository.findAllWithUserAndCommentsOrderedByCreatedAtDesc();
+    }
+    // **********************************************************
+
+    
 }

@@ -3,7 +3,7 @@ package com.asturnet.asturnet.service;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import java.util.List;
-import java.util.Optional; // Puede que lo necesites si usas Optional en algún método, aunque para este no.
+import java.util.Optional;
 
 public interface PostService {
     Post createPost(User user, String content, String imageUrl, String videoUrl);
@@ -11,4 +11,7 @@ public interface PostService {
     List<Post> getAllPosts(); // Para obtener todas las publicaciones (feed general)
     List<Post> getPostsByUser(User user); // Usa este método
     void deletePost(Long postId, User currentUser);
+
+    // *** AÑADE ESTO: Nuevo método para cargar posts con usuarios y comentarios ***
+    List<Post> getAllPostsWithUserAndComments();
 }

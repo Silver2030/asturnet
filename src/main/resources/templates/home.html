@@ -5,375 +5,432 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - AsturNet</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <style>
-        /* Estilos generales del body */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0; /* Elimina el margen por defecto del body */
-            padding: 0; /* Asegúrate de que no haya padding global aquí, lo manejaremos en el container si es necesario */
-            color: #333;
-        }
+<style>
+    /* Estilos generales del body */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 0;
+        color: #333;
+    }
 
-        /* Estilos del header-bar */
+    /* Estilos del header-bar */
+    .header-bar {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .site-branding {
+        flex-grow: 1;
+        text-align: left;
+        margin-right: 20px;
+        min-width: 150px;
+    }
+
+    .header-bar h1 {
+        margin: 0;
+        font-size: 2.2em;
+        color: white;
+    }
+
+    .header-bar .user-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    /* Estilos de botones generales en el header */
+    .header-bar .action-button,
+    .header-bar .logout-button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+    .header-bar .action-button {
+        background-color: #0056b3;
+        color: white;
+    }
+    .header-bar .action-button:hover {
+        background-color: #004085;
+    }
+    .header-bar .logout-button {
+        background-color: #dc3545;
+        color: white;
+    }
+    .header-bar .logout-button:hover {
+        background-color: #c82333;
+    }
+
+    /* Media query para pantallas pequeñas (ej. móviles) */
+    @media (max-width: 768px) {
         .header-bar {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px; /* Padding interno del header */
-            display: flex;
-            flex-wrap: wrap; /* Permite que los elementos salten de línea en pantallas pequeñas */
-            justify-content: space-between; /* Empuja AsturNet a un lado y los botones al otro */
-            align-items: center; /* Centra verticalmente los elementos */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            width: 100%; /* Asegura que ocupe todo el ancho */
-            box-sizing: border-box; /* Incluye padding en el ancho total */
+            flex-direction: column;
+            align-items: flex-start;
         }
-
-        /* Añade el estilo para .site-branding aquí también para que se vea igual que en home */
         .site-branding {
-            flex-grow: 1;
-            text-align: left;
-            margin-right: 20px;
-            min-width: 150px;
-        }
-
-        /* Nuevo estilo para el contenedor de AsturNet */
-        .site-branding {
-            flex-grow: 1; /* Permite que ocupe el espacio disponible */
-            text-align: left; /* Alinea el texto a la izquierda */
-            margin-right: 20px; /* Espacio a la derecha de AsturNet para separarlo de los botones */
-            min-width: 150px; /* Asegura un ancho mínimo para AsturNet */
-        }
-
-        .header-bar h1 {
-            margin: 0; /* Elimina el margen por defecto del h1 */
-            font-size: 2.2em; /* Hazlo un poco más grande para destacarlo */
-            color: white; /* Asegúrate de que el color sea blanco */
-        }
-
-        .header-bar .user-actions {
-            display: flex;
-            flex-wrap: wrap; /* Permite que los botones salten de línea en pantallas pequeñas */
-            gap: 15px; /* Espacio entre los botones */
-            align-items: center;
-            justify-content: flex-end; /* Alinea los botones a la derecha si hay espacio */
-        }
-
-        /* Estilos de botones generales en el header */
-        .header-bar .action-button,
-        .header-bar .logout-button {
-            padding: 8px 15px; /* Reducido un poco para que quepan mejor */
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9em; /* Reducido un poco */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-        .header-bar .action-button {
-            background-color: #0056b3; /* Color ligeramente más oscuro que la barra para contraste */
-            color: white;
-        }
-        .header-bar .action-button:hover {
-            background-color: #004085;
-        }
-        .header-bar .logout-button {
-            background-color: #dc3545;
-            color: white;
-        }
-        .header-bar .logout-button:hover {
-            background-color: #c82333;
-        }
-
-        /* Media query para pantallas pequeñas (ej. móviles) */
-        @media (max-width: 768px) {
-            .header-bar {
-                flex-direction: column; /* Apila los elementos verticalmente */
-                align-items: flex-start; /* Alinea todo a la izquierda */
-            }
-            .site-branding {
-                margin-right: 0; /* Elimina el margen derecho */
-                margin-bottom: 10px; /* Añade margen inferior */
-                width: 100%; /* Ocupa todo el ancho */
-                text-align: center; /* Centra el título en móvil */
-            }
-            .header-bar h1 {
-                font-size: 1.8em; /* Un poco más pequeño en móvil */
-            }
-            .header-bar .user-actions {
-                width: 100%; /* Ocupa todo el ancho */
-                justify-content: center; /* Centra los botones */
-                gap: 10px; /* Ajusta el espacio entre botones */
-            }
-            .header-bar .action-button,
-            .header-bar .logout-button {
-                flex-grow: 1; /* Permite que los botones crezcan y ocupen el espacio disponible */
-                max-width: calc(50% - 5px); /* Limita el ancho para tener dos por fila */
-            }
-        }
-
-
-        /* Tus estilos generales para el container y posts (mantenidos de tu código) */
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .message {
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Estilos para el formulario de crear post */
-        .post-form {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            margin-bottom: 30px;
-        }
-        .post-form textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            resize: vertical;
-            min-height: 80px;
-        }
-        .post-form input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .post-form button {
+            margin-right: 0;
+            margin-bottom: 10px;
             width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            text-align: center;
         }
-        .post-form button:hover {
-            background-color: #218838;
+        .header-bar h1 {
+            font-size: 1.8em;
         }
-
-        /* Estilos para las publicaciones individuales */
-        .post-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .post-header .profile-picture {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid #ddd;
-        }
-        .post-author-info strong {
-            display: block;
-            font-size: 1.1em;
-            color: #007bff;
-        }
-        .post-author-info strong a {
-            text-decoration: none;
-            color: #007bff;
-        }
-        .post-author-info strong a:hover {
-            text-decoration: underline;
-        }
-        .post-author-info span {
-            font-size: 0.9em;
-            color: #666;
-        }
-        .post-content {
-            margin-bottom: 15px;
-            line-height: 1.6;
-            color: #444;
-            white-space: pre-wrap;
-        }
-        .post-media img, .post-media video {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .post-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85em;
-            color: #888;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            margin-top: 15px;
-        }
-        /* Estilos para el botón de eliminar post */
-        .delete-button {
-            background-color: #f44336;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: background-color 0.3s ease;
-        }
-        .delete-button:hover {
-            background-color: #d32f2f;
-        }
-        /* Estilos para el botón de like */
-        .like-button {
-            background-color: #6c757d;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: background-color 0.3s ease;
-        }
-        .like-button:hover {
-            background-color: #5a6268;
-        }
-        .like-button.liked {
-            background-color: #ff4500;
-        }
-        .like-button.liked:hover {
-            background-color: #cc3700;
-        }
-        .post-actions {
-            display: flex;
+        .header-bar .user-actions {
+            width: 100%;
+            justify-content: center;
             gap: 10px;
         }
-        .like-info {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .header-bar .action-button,
+        .header-bar .logout-button {
+            flex-grow: 1;
+            max-width: calc(50% - 5px);
         }
+    }
 
-        /* Estilos para la sección de comentarios */
-        .comments-section {
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-            margin-top: 15px;
-        }
-        .comments-section h4 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #555;
-        }
-        .comment-form textarea {
-            width: calc(100% - 20px);
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            min-height: 40px;
-        }
-        .comment-form button {
-            padding: 8px 15px;
-            background-color: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
-        }
-        .comment-form button:hover {
-            background-color: #138496;
-        }
-        .comment-list {
-            margin-top: 15px;
-        }
-        .comment-item {
-            background-color: #fcfcfc;
-            border: 1px solid #f0f0f0;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .comment-author {
-            font-weight: bold;
-            color: #007bff;
-            font-size: 0.9em;
-        }
-        .comment-author a {
-            text-decoration: none;
-            color: #007bff;
-        }
-        .comment-author a:hover {
-            text-decoration: underline;
-        }
-        .comment-date {
-            font-size: 0.75em;
-            color: #999;
-        }
-        .comment-content-text {
-            font-size: 0.9em;
-            color: #555;
-            white-space: pre-wrap;
-            margin-bottom: 8px;
-        }
-        .comment-actions {
-            text-align: right;
-        }
-        .comment-delete-button {
-            background-color: #ffc107;
-            color: black;
-            padding: 4px 8px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.75em;
-            transition: background-color 0.3s ease;
-        }
-        .comment-delete-button:hover {
-            background-color: #e0a800;
-        }
-    </style>
+
+    /* --- Contenedor Principal --- */
+    .container {
+        max-width: 800px;
+        margin: 30px auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* --- Mensajes (Éxito/Error) --- */
+    .message {
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .error-message {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* --- Títulos y Párrafos de Bienvenida --- */
+    /* Asegúrate de que estos h2 y p que están justo después de los mensajes
+       también estén centrados si es lo que quieres */
+    h2, .container > p { /* Selector más específico para evitar afectar otros p */
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .container h3 { /* Para "Crear nueva publicación" y "Publicaciones recientes" */
+        margin-top: 25px;
+        margin-bottom: 15px;
+        color: #555;
+        text-align: center;
+    }
+
+
+    /* --- Formulario de Publicación (Post Form) --- */
+    .post-form {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        margin-bottom: 30px;
+    }
+    .post-form textarea,
+    .post-form input[type="text"] {
+        width: 100%; /* Ocupa el 100% del contenedor padre */
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+        min-height: 80px;
+        box-sizing: border-box; /* Incluye padding y border en el width */
+    }
+    .post-form input[type="text"] {
+        min-height: auto; /* Resetea el min-height para inputs */
+    }
+    .post-form button {
+        width: 100%; /* El botón ocupa todo el ancho */
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .post-form button:hover {
+        background-color: #218838;
+    }
+
+    /* --- Publicaciones Individuales (Post Card) --- */
+    .post-card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .post-header {
+        display: flex;
+        align-items: center; /* Alinea verticalmente la imagen, nombre y @usuario */
+        margin-bottom: 15px;
+    }
+    .post-header .profile-picture {
+        width: 50px; /* Tamaño para la foto de perfil del post principal */
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 15px;
+        border: 2px solid #ddd;
+        flex-shrink: 0; /* Evita que la imagen se encoja */
+    }
+    .post-author-info {
+        display: flex;
+        flex-direction: column; /* Apila el nombre y el @usuario */
+        line-height: 1.2; /* Reduce el espacio entre líneas */
+    }
+    .post-author-info strong {
+        font-size: 1.1em;
+    }
+    .post-author-info strong a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .post-author-info strong a:hover {
+        text-decoration: underline;
+    }
+    .post-author-info span {
+        font-size: 0.9em;
+        color: #666;
+    }
+    .post-content {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: #444;
+        white-space: pre-wrap; /* Mantiene saltos de línea y espacios en el contenido */
+    }
+    .post-media img,
+    .post-media video {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-top: 10px;
+        display: block; /* Para centrar si quieres, o solo para que ocupe su propia línea */
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .post-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85em;
+        color: #888;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        margin-top: 15px;
+    }
+    .post-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center; /* Alinea los botones de like y eliminar */
+    }
+    .like-info {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .like-button, .delete-button { /* Estilos comunes para botones de acción */
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8em;
+        transition: background-color 0.3s ease;
+    }
+    .like-button {
+        background-color: #6c757d;
+        color: white;
+    }
+    .like-button:hover {
+        background-color: #5a6268;
+    }
+    .like-button.liked {
+        background-color: #ff4500; /* Naranja para "Me gusta" activo */
+    }
+    .like-button.liked:hover {
+        background-color: #cc3700;
+    }
+    .delete-button { /* Botón de eliminar post */
+        background-color: #f44336;
+        color: white;
+    }
+    .delete-button:hover {
+        background-color: #d32f2f;
+    }
+
+    /* --- Sección de Comentarios (Comments Section) --- */
+    .comments-section {
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+    .comments-section h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #555;
+        text-align: left; /* Título "Comentarios" alineado a la izquierda */
+    }
+
+    /* Contenedor individual de cada comentario */
+    .comment { /* ¡Corregido! Ahora .comment tiene estilos */
+        background-color: #fcfcfc;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+        display: flex; /* Para alinear la imagen y el texto del comentario */
+        flex-direction: column; /* Para apilar encabezado y contenido */
+        align-items: flex-start; /* Alinea los elementos a la izquierda */
+    }
+
+    .comment-header { /* Encabezado de cada comentario */
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        width: 100%; /* Ocupa todo el ancho disponible */
+    }
+
+    .comment-header .profile-picture-small { /* ¡Clase crucial para las fotos de perfil en comentarios! */
+        width: 30px; /* Tamaño más pequeño para los comentarios */
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 8px; /* Espacio entre la imagen y el nombre/usuario */
+        border: 1px solid #ddd;
+        flex-shrink: 0; /* Evita que la imagen se encoja */
+    }
+
+    .comment-header strong { /* Nombre del autor del comentario */
+        font-weight: bold;
+        color: #007bff;
+        font-size: 0.9em;
+        line-height: 1.2; /* Ajuste de línea */
+    }
+    .comment-header strong a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    .comment-header strong a:hover {
+        text-decoration: underline;
+    }
+
+    .comment-header span { /* @username del comentario */
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 5px; /* Espacio entre nombre y @usuario */
+    }
+
+    .comment-meta { /* Fecha del comentario */
+        font-size: 0.75em;
+        color: #999;
+        margin-left: auto; /* Empuja la fecha a la derecha en el header */
+        flex-shrink: 0;
+    }
+
+    .comment-content { /* Contenido textual del comentario */
+        font-size: 0.9em;
+        color: #555;
+        white-space: pre-wrap; /* Mantiene saltos de línea y espacios */
+        margin-bottom: 8px;
+        margin-top: 5px;
+        line-height: 1.5;
+        width: 100%; /* Asegura que ocupe todo el ancho */
+        padding-left: calc(30px + 8px); /* Sangría para alinear con el texto del encabezado */
+        box-sizing: border-box;
+    }
+
+    .comment-actions { /* Contenedor de acciones del comentario (botón eliminar) */
+        text-align: right;
+        width: 100%;
+        padding-left: calc(30px + 8px); /* Sangría para alinear con el texto */
+        box-sizing: border-box;
+        margin-top: 5px;
+    }
+
+    .comment-actions .delete-button { /* Botón de eliminar comentario (¡usando la misma clase!) */
+        background-color: #ffc107; /* Amarillo para eliminar comentario (por consistencia con tu original) */
+        color: black;
+        padding: 4px 8px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.75em;
+        transition: background-color 0.3s ease;
+    }
+    .comment-actions .delete-button:hover {
+        background-color: #e0a800;
+    }
+
+    /* Formulario para añadir comentarios */
+    .comment-form-container {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    .comment-form {
+        display: flex;
+        gap: 10px;
+    }
+    .comment-form textarea {
+        flex-grow: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+        min-height: 40px;
+        box-sizing: border-box;
+    }
+    .comment-form button {
+        padding: 8px 15px;
+        background-color: #17a2b8; /* Azul claro para el botón de comentar */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+    }
+    .comment-form button:hover {
+        background-color: #138496;
+    }
+</style>
 </head>
 <body>
     <div class="header-bar">
@@ -443,9 +500,64 @@
             Tu navegador no soporta el elemento de video.
         </video>
     </div>
+
     <div class="post-footer">
         <div class="post-meta">
             <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+        </div>
+        <div class="post-actions">
+            <div sec:authorize="isAuthenticated()" class="like-info">
+                <form th:if="${userLikesPost != null and postLikesCount != null}" th:action="@{/posts/toggleLike}" method="post" style="display:inline;">
+                    <input type="hidden" name="postId" th:value="${post.id}">
+                    <button type="submit"
+                            th:classappend="${userLikesPost.containsKey(post.id) and userLikesPost.get(post.id)} ? 'liked' : ''"
+                            class="like-button">
+                        <span th:text="${userLikesPost.containsKey(post.id) and userLikesPost.get(post.id)} ? 'Ya no me gusta' : 'Me gusta'"></span>
+                    </button>
+                </form>
+                <span th:if="${postLikesCount != null and postLikesCount.containsKey(post.id)}" th:text="${postLikesCount.get(post.id)} + ' likes'"></span>
+                <span th:unless="${postLikesCount != null and postLikesCount.containsKey(post.id)}">0 likes</span>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <form th:if="${userId != null and post.user != null and userId == post.user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                    <input type="hidden" name="postId" th:value="${post.id}">
+                    <button type="submit" class="delete-button">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <h4>Comentarios (<span th:text="${post.comments != null ? post.comments.size() : 0}">0</span>)</h4>
+        <div th:each="comment : ${post.comments}" class="comment">
+            <div class="comment-header">
+                <img th:if="${comment.user != null and comment.user.profilePictureUrl != null and comment.user.profilePictureUrl != ''}"
+                     th:src="${comment.user.profilePictureUrl}"
+                     alt="Foto de perfil"
+                     class="profile-picture-small">
+                <img th:unless="${comment.user != null and comment.user.profilePictureUrl != null and comment.user.profilePictureUrl != ''}"
+                     th:src="@{/images/default-profile.png}"
+                     alt="Foto de perfil por defecto"
+                     class="profile-picture-small">
+                <strong><a th:if="${comment.user != null}" th:href="@{'/profile/' + ${comment.user.username}}" th:text="${comment.user.fullName != null and comment.user.fullName != '' ? comment.user.fullName : comment.user.username}"></a></strong>
+                <span th:if="${comment.user != null}" th:text="'@' + ${comment.user.username}"></span>
+                <span class="comment-meta" th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <p class="comment-content" th:text="${comment.content}"></p>
+            <div sec:authorize="isAuthenticated()" class="comment-actions">
+                <form th:if="${userId != null and comment.user != null and userId == comment.user.id}" th:action="@{/comments/delete}" method="post" style="display: inline-block;">
+                    <input type="hidden" name="commentId" th:value="${comment.id}">
+                    <button type="submit" class="delete-button">Eliminar</button>
+                </form>
+            </div>
+        </div>
+
+        <div sec:authorize="isAuthenticated()" class="comment-form-container">
+            <form th:action="@{/comments/create}" method="post" class="comment-form">
+                <input type="hidden" name="postId" th:value="${post.id}">
+                <textarea name="content" placeholder="Añadir un comentario..." required></textarea>
+                <button type="submit">Comentar</button>
+            </form>
         </div>
     </div>
 </div>
