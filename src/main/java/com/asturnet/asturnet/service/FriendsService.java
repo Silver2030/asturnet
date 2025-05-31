@@ -33,4 +33,6 @@ public interface FriendsService {
 
     // CANCEL FRIEND REQUEST: Añadido este método
     void cancelFriendRequest(User sender, User receiver);
+
+    List<User> getAcceptedFriends(User user);
 }

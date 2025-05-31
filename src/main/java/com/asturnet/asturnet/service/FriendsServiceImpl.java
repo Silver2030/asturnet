@@ -183,4 +183,24 @@ public class FriendsServiceImpl implements FriendsService {
 
         return new ArrayList<>(uniqueFriends);
     }
+
+    @Override
+    public List<User> getAcceptedFriends(User user) {
+        // Obtener las amistades donde el 'user' es el que envía la solicitud y el estado es ACCEPTED
+        List<Friends> friendshipsAsUser = friendsRepository.findByUserAndStatus(user, FriendshipStatus.ACCEPTED);
+        // Obtener las amistades donde el 'user' es el que recibe la solicitud y el estado es ACCEPTED
+        List<Friends> friendshipsAsFriend = friendsRepository.findByFriendAndStatus(user, FriendshipStatus.ACCEPTED);
+
+        // Recopilar los amigos de ambas listas, evitando duplicados
+        Set<User> friends = friendshipsAsUser.stream()
+                                            .map(Friends::getFriend) // El 'friend' es el amigo del 'user'
+                                            .collect(Collectors.toSet());
+
+        friendshipsAsFriend.stream()
+                           .map(Friends::getUser) // El 'user' es el amigo del 'friend' (user actual)
+                           .forEach(friends::add);
+
+        // Convertir el Set (para eliminar duplicados) de nuevo a List
+        return friends.stream().collect(Collectors.toList());
+    }
 }
