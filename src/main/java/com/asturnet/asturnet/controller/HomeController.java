@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.security.Principal; // Necesitas esto para obtener el usuario autenticado
 import java.util.List;
 import java.util.stream.Collectors; // Para usar streams
@@ -43,7 +45,7 @@ public class HomeController {
         }
 
         // Obtén todas las publicaciones
-        List<Post> allPosts = postService.findAllPostsOrderedByCreatedAtDesc();
+        List<Post> allPosts = postService.getAllPosts();
 
         // Filtrar las publicaciones
         List<Post> filteredPosts = allPosts.stream()
@@ -85,6 +87,19 @@ public class HomeController {
         }
 
         return "home";
+    }
+
+    @GetMapping("/search")
+    public String searchUsers(@RequestParam(value = "query", required = false) String query, Model model) {
+        List<User> searchResults = List.of(); // Inicializa como lista vacía
+
+        if (query != null && !query.trim().isEmpty()) {
+            searchResults = userService.searchUsers(query.trim());
+            model.addAttribute("query", query); // Para mostrar la query en el input de búsqueda
+        }
+
+        model.addAttribute("searchResults", searchResults);
+        return "search-results"; // Nombre de tu nueva plantilla Thymeleaf para resultados
     }
 
     // Otros métodos del controlador...

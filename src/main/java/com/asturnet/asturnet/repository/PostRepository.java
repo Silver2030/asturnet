@@ -13,6 +13,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Método para encontrar todos los posts, ordenados por fecha de creación descendente (para el feed general)
     List<Post> findByOrderByCreatedAtDesc();
-
-    List<Post> findAllByOrderByCreatedAtDesc();
 }

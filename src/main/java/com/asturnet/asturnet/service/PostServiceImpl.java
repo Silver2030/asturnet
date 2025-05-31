@@ -61,9 +61,4 @@ public class PostServiceImpl implements PostService {
         postRepository.delete(post); // Elimina el post
     }
 
-        // *** ¡AÑADE ESTA IMPLEMENTACIÓN! ***
-    @Override
-    public List<Post> findAllPostsOrderedByCreatedAtDesc() {
-        return postRepository.findAllByOrderByCreatedAtDesc(); // Delega al repositorio para la ordenación
-    }
 }

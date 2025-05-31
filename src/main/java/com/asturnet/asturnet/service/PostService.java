@@ -11,7 +11,4 @@ public interface PostService {
     List<Post> getAllPosts(); // Para obtener todas las publicaciones (feed general)
     List<Post> getPostsByUser(User user); // Usa este método
     void deletePost(Long postId, User currentUser);
-
-    // *** ¡AÑADE ESTA LÍNEA! ***
-    List<Post> findAllPostsOrderedByCreatedAtDesc();
 }
