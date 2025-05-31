@@ -105,9 +105,10 @@
         <h1>AsturNet</h1>
         <div class="user-actions">
             <a th:href="@{/home}" class="action-button">Inicio</a>
-            <a th:href="@{/profile/edit}" class="action-button" sec:authorize="isAuthenticated()">Editar Perfil</a>
-            <a th:href="@{/profile}" class="action-button" sec:authorize="isAuthenticated()">Ver Mi Perfil</a>
-            <form th:action="@{/logout}" method="post" style="display: inline-block;" sec:authorize="isAuthenticated()">
+            <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
+            <a th:href="@{/search}" class="action-button">Buscar Usuarios</a>
+            <a th:href="@{/friend-requests}" class="action-button">Solicitudes Recibidas</a>
+            <form th:action="@{/logout}" method="post" style="display: inline-block;">
                 <button type="submit" class="logout-button">Cerrar Sesión</button>
             </form>
         </div>
@@ -253,30 +254,35 @@
 
         <div th:if="${!isPrivateAndNotFriend}">
             <div class="user-friends-section" style="margin-top: 40px; text-align: left;">
-                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">Amigos de <span th:text="${user.username}"></span></h3>
+                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
+                    <span th:if="${isCurrentUser}">Mis Amigos</span> <span th:unless="${isCurrentUser}">Amigos de <span th:text="${user.username}"></span></span> </h3>
 
                 <div th:if="${#lists.isEmpty(friendsList)}">
                     <p th:text="${isCurrentUser ? 'Aún no tienes amigos.' : 'Este usuario aún no tiene amigos.'}"
-                       style="text-align: center; color: #777;"></p>
+                    style="text-align: center; color: #777;"></p>
                 </div>
                 <div th:unless="${#lists.isEmpty(friendsList)}">
                     <ul style="list-style: none; padding: 0;">
                         <li th:each="friend : ${friendsList}" style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
                             <img th:if="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
-                                 th:src="${friend.profilePictureUrl}"
-                                 alt="Foto de perfil del amigo"
-                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                                th:src="${friend.profilePictureUrl}"
+                                alt="Foto de perfil del amigo"
+                                class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
                             <img th:unless="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
-                                 th:src="@{/images/default-profile.png}"
-                                 alt="Foto de perfil por defecto"
-                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                                th:src="@{/images/default-profile.png}"
+                                alt="Foto de perfil por defecto"
+                                class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
                             <a th:href="@{'/profile/' + ${friend.username}}" th:text="${friend.fullName != null and friend.fullName != '' ? friend.fullName : friend.username}"
-                               style="text-decoration: none; color: #007bff; font-weight: bold;"></a>
+                            style="text-decoration: none; color: #007bff; font-weight: bold;"></a>
                             <span th:text="' (@' + ${friend.username} + ')'" style="color: #666; font-size: 0.9em; margin-left: 5px;"></span>
                         </li>
                     </ul>
                 </div>
             </div>
+
+            <div class="user-posts-section">
+                <h3>Publicaciones de <span th:text="${user.username}"></span></h3>
+                </div>
         </div>
 
         <div class="action-buttons" style="margin-top: 40px;">
