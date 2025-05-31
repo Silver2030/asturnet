@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,51 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         /* Tus estilos CSS del antiguo view-profile.html aquí */
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .header-bar {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header-bar h1 {
+            margin: 0;
+            font-size: 1.8em;
+        }
+        .header-bar .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .header-bar .action-button {
+            background-color: #0056b3;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .header-bar .action-button:hover {
+            background-color: #004085;
+        }
+        .header-bar .logout-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        .header-bar .logout-button:hover {
+            background-color: #c82333;
+        }
+
         .container { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .profile-header { margin-bottom: 25px; }
         .profile-picture { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #007bff; margin-bottom: 15px; background-color: #eee; }
@@ -26,10 +71,19 @@
         /* Estilos adicionales para amistad y posts */
         .friendship-actions { margin-top: 20px; }
         .friendship-actions form { display: inline-block; margin: 0 5px; }
-        .action-button { background-color: #007bff; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; }
-        .action-button.btn-warning { background-color: #ffc107; color: #333; }
-        .action-button.btn-success { background-color: #28a745; }
-        .action-button.btn-danger { background-color: #dc3545; }
+        /* Reutiliza .action-button para los botones de amistad o crea específicos si necesitas otro estilo */
+        .action-button.add-friend-button { background-color: #28a745; } /* Verde para añadir */
+        .action-button.add-friend-button:hover { background-color: #218838; }
+
+        .action-button.cancel-request-button { background-color: #ffc107; color: #333; } /* Amarillo para cancelar */
+        .action-button.cancel-request-button:hover { background-color: #e0a800; }
+
+        .action-button.accept-request-button { background-color: #28a745; } /* Verde para aceptar */
+        .action-button.accept-request-button:hover { background-color: #218838; }
+
+        .action-button.decline-request-button, .action-button.remove-friend-button { background-color: #dc3545; } /* Rojo para rechazar/eliminar */
+        .action-button.decline-request-button:hover, .action-button.remove-friend-button:hover { background-color: #c82333; }
+
 
         .user-posts-section { margin-top: 40px; text-align: left; }
         .user-posts-section h3 { text-align: center; margin-bottom: 20px; color: #333; }
@@ -47,6 +101,18 @@
     </style>
 </head>
 <body>
+    <div class="header-bar">
+        <h1>AsturNet</h1>
+        <div class="user-actions">
+            <a th:href="@{/home}" class="action-button">Inicio</a>
+            <a th:href="@{/profile/edit}" class="action-button" sec:authorize="isAuthenticated()">Editar Perfil</a>
+            <a th:href="@{/profile}" class="action-button" sec:authorize="isAuthenticated()">Ver Mi Perfil</a>
+            <form th:action="@{/logout}" method="post" style="display: inline-block;" sec:authorize="isAuthenticated()">
+                <button type="submit" class="logout-button">Cerrar Sesión</button>
+            </form>
+        </div>
+    </div>
+
     <div class="container">
         <div th:if="${successMessage}" class="message success-message">
             <span th:text="${successMessage}"></span>
@@ -72,36 +138,48 @@
         </div>
 
         <div class="action-buttons">
-            <a th:if="${isCurrentUser}" th:href="@{/profile/edit}">Editar Perfil</a>
+            <a th:if="${isCurrentUser}" th:href="@{/profile/edit}" class="action-button">Editar Perfil</a>
 
             <div th:if="${!isCurrentUser}" class="friendship-actions">
-                <form th:if="${friendshipStatus == T(com.asturnet.asturnet.model.FriendshipStatus).NONE}"
-                      th:action="@{/friends/sendRequest}" method="post">
-                    <input type="hidden" name="receiverId" th:value="${user.id}">
-                    <button type="submit" class="action-button">Añadir Amigo</button>
-                </form>
+                <div th:switch="${friendshipStatus}">
+                    <span th:case="${T(com.asturnet.asturnet.model.FriendshipStatus).NOT_FRIENDS}">
+                        <form th:action="@{/friends/sendRequest}" method="post">
+                            <input type="hidden" name="receiverId" th:value="${user.id}">
+                            <button type="submit" class="action-button add-friend-button">Añadir Amigo</button>
+                        </form>
+                    </span>
 
-                <form th:if="${sentPendingRequest}"
-                      th:action="@{/friends/cancelRequest}" method="post">
-                    <input type="hidden" name="receiverId" th:value="${user.id}">
-                    <button type="submit" class="action-button btn-warning">Solicitud Enviada (Cancelar)</button>
-                </form>
+                    <span th:case="${T(com.asturnet.asturnet.model.FriendshipStatus).PENDING}">
+                        <div th:if="${sentPendingRequest}">
+                            <p>Solicitud enviada.</p>
+                            <form th:action="@{/friends/cancelRequest}" method="post">
+                                <input type="hidden" name="receiverId" th:value="${user.id}">
+                                <button type="submit" class="action-button cancel-request-button">Cancelar Solicitud</button>
+                            </form>
+                        </div>
+                        <div th:if="${receivedPendingRequest}">
+                            <p>Solicitud de amistad pendiente. ¿Aceptar?</p>
+                            <form th:action="@{/friends/acceptRequest}" method="post" style="display:inline;">
+                                <input type="hidden" name="requesterId" th:value="${user.id}">
+                                <button type="submit" class="action-button accept-request-button">Aceptar Solicitud</button>
+                            </form>
+                            <form th:action="@{/friends/declineRequest}" method="post" style="display:inline; margin-left: 10px;">
+                                <input type="hidden" name="requesterId" th:value="${user.id}">
+                                <button type="submit" class="action-button decline-request-button">Rechazar Solicitud</button>
+                            </form>
+                        </div>
+                    </span>
 
-                <div th:if="${receivedPendingRequest}">
-                    <form th:action="@{/friends/acceptRequest}" method="post" style="display:inline;">
-                        <input type="hidden" name="requesterId" th:value="${user.id}">
-                        <button type="submit" class="action-button btn-success">Aceptar Solicitud</button>
-                    </form>
-                    <form th:action="@{/friends/declineRequest}" method="post" style="display:inline; margin-left: 10px;">
-                        <input type="hidden" name="requesterId" th:value="${user.id}">
-                        <button type="submit" class="action-button btn-danger">Rechazar Solicitud</button>
-                    </form>
+                    <span th:case="${T(com.asturnet.asturnet.model.FriendshipStatus).ACCEPTED}">
+                        <p>¡Sois amigos!</p>
+                        <form th:action="@{/friends/removeFriend}" method="post">
+                            <input type="hidden" name="friendId" th:value="${user.id}">
+                            <button type="submit" class="action-button remove-friend-button">Eliminar Amigo</button>
+                        </form>
+                    </span>
+                    <span th:case="*">
+                        </span>
                 </div>
-
-                <form th:if="${isFriend}" th:action="@{/friends/removeFriend}" method="post">
-                    <input type="hidden" name="friendId" th:value="${user.id}">
-                    <button type="submit" class="action-button btn-danger">Eliminar Amigo</button>
-                </form>
             </div>
         </div>
 
@@ -140,7 +218,7 @@
                          alt="Foto de perfil por defecto"
                          class="profile-picture-small">
                     <div class="post-author-info">
-                        <strong th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></strong>
+                        <strong><a th:href="@{'/profile/' + ${post.user.username}}" th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></a></strong>
                         <span th:text="'@' + ${post.user.username}"></span>
                     </div>
                 </div>
@@ -161,7 +239,7 @@
                         <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
                     </div>
                     <div sec:authorize="isAuthenticated()">
-                        <form th:if="${(isCurrentUser and user.id == post.user.id) or (!isCurrentUser and user.id == post.user.id)}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                        <form th:if="${isCurrentUser and post.user.id == user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
                             <input type="hidden" name="postId" th:value="${post.id}">
                             <button type="submit" class="delete-button">Eliminar</button>
                         </form>
@@ -173,8 +251,36 @@
             <p>Este perfil es privado. Solo los amigos pueden ver las publicaciones.</p>
         </div>
 
+        <div th:if="${!isPrivateAndNotFriend}">
+            <div class="user-friends-section" style="margin-top: 40px; text-align: left;">
+                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">Amigos de <span th:text="${user.username}"></span></h3>
+
+                <div th:if="${#lists.isEmpty(friendsList)}">
+                    <p th:text="${isCurrentUser ? 'Aún no tienes amigos.' : 'Este usuario aún no tiene amigos.'}"
+                       style="text-align: center; color: #777;"></p>
+                </div>
+                <div th:unless="${#lists.isEmpty(friendsList)}">
+                    <ul style="list-style: none; padding: 0;">
+                        <li th:each="friend : ${friendsList}" style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
+                            <img th:if="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
+                                 th:src="${friend.profilePictureUrl}"
+                                 alt="Foto de perfil del amigo"
+                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                            <img th:unless="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
+                                 th:src="@{/images/default-profile.png}"
+                                 alt="Foto de perfil por defecto"
+                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                            <a th:href="@{'/profile/' + ${friend.username}}" th:text="${friend.fullName != null and friend.fullName != '' ? friend.fullName : friend.username}"
+                               style="text-decoration: none; color: #007bff; font-weight: bold;"></a>
+                            <span th:text="' (@' + ${friend.username} + ')'" style="color: #666; font-size: 0.9em; margin-left: 5px;"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <div class="action-buttons" style="margin-top: 40px;">
-            <a th:href="@{/home}">Volver al Inicio</a>
+            <a th:href="@{/home}" class="action-button">Volver al Inicio</a>
         </div>
     </div>
 </body>
