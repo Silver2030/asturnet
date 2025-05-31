@@ -8,10 +8,12 @@ import java.util.Optional;
 public interface PostService {
     Post createPost(User user, String content, String imageUrl, String videoUrl);
     Post getPostById(Long postId);
-    List<Post> getAllPosts(); // Para obtener todas las publicaciones (feed general)
-    List<Post> getPostsByUser(User user); // Usa este método
+    List<Post> getAllPosts();
+    List<Post> getPostsByUser(User user);
     void deletePost(Long postId, User currentUser);
 
-    // *** AÑADE ESTO: Nuevo método para cargar posts con usuarios y comentarios ***
     List<Post> getAllPostsWithUserAndComments();
+
+    // Método que necesitamos implementar para el feed filtrado
+    List<Post> getHomeFeedPosts(User currentUser);
 }
