@@ -14,14 +14,5 @@ public class HomeController {
         model.addAttribute("message", "¡Bienvenido a AsturNet! Inicia sesión para empezar.");
         return "index"; // Devuelve la plantilla index.html
     }
-
-    @GetMapping("/home") // Nueva ruta para la página de inicio post-login
-    public String homePage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        if (userDetails != null) {
-            model.addAttribute("username", userDetails.getUsername());
-        } else {
-            model.addAttribute("username", "Invitado"); // En caso de que se acceda sin autenticar (aunque no debería pasar si está protegida)
-        }
-        return "home"; // Devuelve la plantilla home.html
-    }
+    
 }

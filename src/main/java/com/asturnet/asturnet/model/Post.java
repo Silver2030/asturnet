@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Set; // Para las colecciones de comentarios y likes
+// import java.util.Set; // Dejamos esto comentado por ahora, para no añadir complejidad con Comments/Likes
 
 @Entity
 @Table(name = "posts")
@@ -21,31 +21,33 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación Many-to-One con User
-    @JoinColumn(name = "user_id", nullable = false) // Columna user_id en la tabla posts
-    private User user; // El usuario que creó el post
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String content; // Contenido textual del post
 
-    @Column(columnDefinition = "TEXT", nullable = false) // Contenido del post, TEXT y no nulo
-    private String content;
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl; // URL de la imagen si la hay
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "video_url", columnDefinition = "TEXT")
+    private String videoUrl; // URL del video si lo hay
+
+    @ManyToOne(fetch = FetchType.LAZY) // Relación Muchos a Uno con User (Muchos posts pueden ser de UN usuario)
+    @JoinColumn(name = "user_id", nullable = false) // Columna en la tabla 'posts' que guarda el ID del usuario
+    private User user; // El objeto User que es el autor de la publicación
+
+    @CreationTimestamp // Anotación de Hibernate para establecer la fecha de creación automáticamente
+    @Column(name = "created_at", updatable = false) // Columna created_at: no actualizable después de la creación
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
+    @UpdateTimestamp // Anotación de Hibernate para actualizar la fecha automáticamente
+    @Column(name = "updated_at") // Columna updated_at
     private LocalDateTime updatedAt;
 
-    // --- Relaciones de JPA con otras entidades (opcional, puedes añadir más tarde) ---
-
+    // Si en el futuro añades Comentarios o Likes, sus relaciones OneToMany irían aquí:
     /*
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Comment> comments; // Comentarios en este post
+    private Set<Comment> comments;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Like> likes; // Likes en este post
-
-    @OneToMany(mappedBy = "reportedPost", cascade = CascadeType.ALL)
-    private Set<Report> reports; // Reportes sobre este post
+    private Set<Like> likes;
     */
 }

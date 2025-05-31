@@ -6,63 +6,261 @@
     <title>Inicio - AsturNet</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* Estilos existentes */
-        .logout-form {
-            text-align: right;
-            margin-top: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .header-bar h1 {
+            margin: 0;
+            color: #007bff;
+        }
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .action-button, .logout-button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1em;
+            display: inline-flex; /* Para alinear con texto si hay iconos */
+            align-items: center;
+            justify-content: center;
+        }
+        .action-button {
+            background-color: #007bff;
+            color: white;
+        }
+        .action-button:hover {
+            background-color: #0056b3;
         }
         .logout-button {
             background-color: #dc3545;
             color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 10px; /* Espacio entre botones de la cabecera */
         }
         .logout-button:hover {
             background-color: #c82333;
         }
-        .profile-link-button { /* Nuevo estilo para el botón de perfil */
-            background-color: #007bff;
+        .message {
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Estilos para el formulario de crear post */
+        .post-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        .post-form textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .post-form input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .post-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
             color: white;
-            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .post-form button:hover {
+            background-color: #218838;
+        }
+
+        /* Estilos para las publicaciones individuales */
+        .post-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .post-header .profile-picture {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+        .post-author-info strong {
+            display: block;
+            font-size: 1.1em;
+            color: #007bff;
+        }
+        .post-author-info span {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .post-content {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            color: #444;
+            white-space: pre-wrap; /* Para respetar saltos de línea en el texto */
+        }
+        .post-media img, .post-media video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: 15px;
+        }
+        .post-footer .delete-button {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            text-decoration: none; /* Para que parezca un botón */
-            display: inline-block; /* Para que funcione margin-left */
+            font-size: 0.8em;
+            transition: background-color 0.3s ease;
         }
-        .profile-link-button:hover {
-            background-color: #0056b3;
-        }
-        .action-buttons {
-            margin-top: 20px;
-            text-align: center; /* Centrar los botones de acción */
-        }
-        .action-buttons a { /* Estilo para todos los enlaces/botones de acción */
-            margin: 0 10px;
+        .post-footer .delete-button:hover {
+            background-color: #d32f2f;
         }
     </style>
 </head>
 <body>
-    <div class="logout-form">
-        <a th:href="@{/profile/edit}" class="profile-link-button">Editar Perfil</a>
-        <form th:action="@{/logout}" method="post" style="display: inline-block;">
-            <button type="submit" class="logout-button">Cerrar Sesión</button>
-        </form>
-    </div>
-    <h1>¡Bienvenido, <span th:text="${username}"></span>!</h1>
-    <p>Esta es tu página de inicio después de iniciar sesión.</p>
-    <p>Aquí verás tu feed de noticias, publicaciones de amigos, etc.</p>
+    <div class="container">
+        <div class="header-bar">
+            <h1>AsturNet</h1>
+            <div class="user-actions">
+                <a th:href="@{/profile/edit}" class="action-button">Editar Perfil</a>
+                <a th:href="@{/profile}" class="action-button">Ver Mi Perfil</a>
+                <form th:action="@{/logout}" method="post" style="display: inline-block;">
+                    <button type="submit" class="logout-button">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
 
-    <div sec:authorize="hasRole('ROLE_USER')">
-        <p>Eres un usuario registrado.</p>
-    </div>
+        <div th:if="${successMessage}" class="message success-message">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="message error-message">
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-    <p>Explora tu red social AsturNet.</p>
+        <h2>¡Bienvenido, <span th:text="${username}"></span>!</h2>
+        <p>¿Qué tienes en mente hoy?</p>
 
-    <div class="action-buttons">
-        <a th:href="@{/profile}" class="profile-link-button">Ver Mi Perfil</a> </div>
+        <div class="post-form">
+            <h3>Crear nueva publicación</h3>
+            <form th:action="@{/posts/create}" method="post">
+                <textarea name="content" placeholder="Escribe algo..." th:value="${postContent}"></textarea>
+                <input type="text" name="imageUrl" placeholder="URL de la imagen (opcional)" th:value="${postImageUrl}">
+                <input type="text" name="videoUrl" placeholder="URL del video (opcional)" th:value="${postVideoUrl}">
+                <button type="submit">Publicar</button>
+            </form>
+        </div>
+
+        <h3>Publicaciones recientes</h3>
+        <div th:if="${posts.isEmpty()}">
+            <p>No hay publicaciones aún. ¡Sé el primero en publicar!</p>
+        </div>
+        <div th:each="post : ${posts}" class="post-card">
+            <div class="post-header">
+                <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                     th:src="${post.user.profilePictureUrl}"
+                     alt="Foto de perfil"
+                     class="profile-picture">
+                <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                     th:src="@{/images/default-profile.png}"
+                     alt="Foto de perfil por defecto"
+                     class="profile-picture">
+                <div class="post-author-info">
+                    <strong th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></strong>
+                    <span th:text="'@' + ${post.user.username}"></span>
+                </div>
+            </div>
+            <div class="post-content">
+                <p th:text="${post.content}"></p>
+            </div>
+            <div th:if="${post.imageUrl != null and post.imageUrl != ''}" class="post-media">
+                <img th:src="${post.imageUrl}" alt="Imagen de la publicación">
+            </div>
+            <div th:if="${post.videoUrl != null and post.videoUrl != ''}" class="post-media">
+                <video controls>
+                    <source th:src="${post.videoUrl}" type="video/mp4">
+                    Tu navegador no soporta el elemento de video.
+                </video>
+            </div>
+            <div class="post-footer">
+                <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                <div sec:authorize="isAuthenticated()">
+                    <form th:if="${userId == post.user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="postId" th:value="${post.id}">
+                        <button type="submit" class="delete-button">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
 </body>
 </html>
