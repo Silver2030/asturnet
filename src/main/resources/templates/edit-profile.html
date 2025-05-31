@@ -115,8 +115,9 @@
                 <label for="profilePictureUrl">URL de Foto de Perfil:</label>
                 <input type="text" id="profilePictureUrl" name="profilePictureUrl" th:value="${user.profilePictureUrl}">
             </div>
-            
+
             <div class="form-group">
+                <input type="hidden" name="isPrivate" value="false">
                 <input type="checkbox" id="isPrivate" name="isPrivate" th:checked="${user.isPrivate}">
                 <label for="isPrivate">Marcar perfil como privado</label>
             </div>
