@@ -21,27 +21,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Método para ver el propio perfil del usuario logueado
-    @GetMapping("/profile")
-    public String viewOwnProfile(@AuthenticationPrincipal UserDetails currentUserDetails, Model model) {
-        if (currentUserDetails == null) {
-            return "redirect:/login";
-        }
-
-        User currentUser = userService.findByUsername(currentUserDetails.getUsername());
-        model.addAttribute("user", currentUser);
-        model.addAttribute("isCurrentUser", true);
-
-        if (model.containsAttribute("successMessage")) {
-            model.addAttribute("successMessage", model.getAttribute("successMessage"));
-        }
-        if (model.containsAttribute("errorMessage")) {
-            model.addAttribute("errorMessage", model.getAttribute("errorMessage"));
-        }
-
-        return "profile";
-    }
-
     // Muestra el formulario de edición de perfil
     @GetMapping("/profile/edit")
     public String showEditProfilePage(@AuthenticationPrincipal UserDetails currentUserDetails, Model model) {
