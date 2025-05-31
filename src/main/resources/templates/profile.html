@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.username} + ' - Perfil de Usuario - AsturNet'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Tus estilos CSS del antiguo view-profile.html aquí */
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .profile-header { margin-bottom: 25px; }
+        .profile-picture { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #007bff; margin-bottom: 15px; background-color: #eee; }
+        .profile-picture-small { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; } /* Nuevo estilo para posts */
+        h1 { color: #333; margin-bottom: 10px; }
+        .username { font-size: 1.2em; color: #666; margin-bottom: 20px; }
+        .profile-detail { text-align: left; margin-bottom: 15px; line-height: 1.6; }
+        .profile-detail strong { display: inline-block; width: 120px; color: #555; }
+        .profile-detail p { margin: 0; }
+        .bio { background-color: #f9f9f9; border: 1px solid #eee; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .action-buttons { margin-top: 30px; display: flex; justify-content: center; gap: 20px; }
+        .action-buttons a, .action-buttons button { padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none; transition: background-color 0.3s ease; border: none; cursor: pointer; }
+        .action-buttons a:hover, .action-buttons button:hover { background-color: #0056b3; }
+        .private-badge { background-color: #ffc107; color: #333; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; font-weight: bold; margin-left: 10px; }
+
+        /* Estilos adicionales para amistad y posts */
+        .friendship-actions { margin-top: 20px; }
+        .friendship-actions form { display: inline-block; margin: 0 5px; }
+        .action-button { background-color: #007bff; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; border: none; cursor: pointer; }
+        .action-button.btn-warning { background-color: #ffc107; color: #333; }
+        .action-button.btn-success { background-color: #28a745; }
+        .action-button.btn-danger { background-color: #dc3545; }
+
+        .user-posts-section { margin-top: 40px; text-align: left; }
+        .user-posts-section h3 { text-align: center; margin-bottom: 20px; color: #333; }
+        .post-card { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .post-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .post-author-info { flex-grow: 1; }
+        .post-content p { margin: 0 0 10px 0; line-height: 1.5; }
+        .post-media img, .post-media video { max-width: 100%; height: auto; border-radius: 5px; margin-top: 10px; display: block; }
+        .post-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: #777; margin-top: 15px; }
+        .delete-button { background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+        .private-profile-message { background-color: #ffe0b2; color: #e65100; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .message { padding: 12px; margin-bottom: 20px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div th:if="${successMessage}" class="message success-message">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="message error-message">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="profile-header">
+            <img th:if="${user.profilePictureUrl != null and user.profilePictureUrl != ''}"
+                 th:src="${user.profilePictureUrl}"
+                 alt="Foto de perfil"
+                 class="profile-picture">
+            <img th:unless="${user.profilePictureUrl != null and user.profilePictureUrl != ''}"
+                 th:src="@{/images/default-profile.png}"
+                 alt="Foto de perfil por defecto"
+                 class="profile-picture">
+
+            <h1 th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}"></h1>
+            <p class="username">@<span th:text="${user.username}"></span>
+                <span th:if="${user.isPrivate}" class="private-badge">Privado</span>
+            </p>
+        </div>
+
+        <div class="action-buttons">
+            <a th:if="${isCurrentUser}" th:href="@{/profile/edit}">Editar Perfil</a>
+
+            <div th:if="${!isCurrentUser}" class="friendship-actions">
+                <form th:if="${friendshipStatus == T(com.asturnet.asturnet.model.FriendshipStatus).NONE}"
+                      th:action="@{/friends/sendRequest}" method="post">
+                    <input type="hidden" name="receiverId" th:value="${user.id}">
+                    <button type="submit" class="action-button">Añadir Amigo</button>
+                </form>
+
+                <form th:if="${sentPendingRequest}"
+                      th:action="@{/friends/cancelRequest}" method="post">
+                    <input type="hidden" name="receiverId" th:value="${user.id}">
+                    <button type="submit" class="action-button btn-warning">Solicitud Enviada (Cancelar)</button>
+                </form>
+
+                <div th:if="${receivedPendingRequest}">
+                    <form th:action="@{/friends/acceptRequest}" method="post" style="display:inline;">
+                        <input type="hidden" name="requesterId" th:value="${user.id}">
+                        <button type="submit" class="action-button btn-success">Aceptar Solicitud</button>
+                    </form>
+                    <form th:action="@{/friends/declineRequest}" method="post" style="display:inline; margin-left: 10px;">
+                        <input type="hidden" name="requesterId" th:value="${user.id}">
+                        <button type="submit" class="action-button btn-danger">Rechazar Solicitud</button>
+                    </form>
+                </div>
+
+                <form th:if="${isFriend}" th:action="@{/friends/removeFriend}" method="post">
+                    <input type="hidden" name="friendId" th:value="${user.id}">
+                    <button type="submit" class="action-button btn-danger">Eliminar Amigo</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="profile-details">
+            <div class="profile-detail">
+                <strong>Email:</strong> <span th:text="${user.email}"></span>
+            </div>
+            <div class="profile-detail bio">
+                <strong>Biografía:</strong>
+                <p th:text="${user.bio != null and user.bio != '' ? user.bio : 'No hay biografía disponible.'}"></p>
+            </div>
+            <div class="profile-detail">
+                <strong>Nivel de Privacidad:</strong> <span th:text="${user.privacyLevel.name()}"></span>
+            </div>
+            <div class="profile-detail">
+                <strong>Miembro desde:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <div class="profile-detail">
+                <strong>Última actualización:</strong> <span th:text="${#temporals.format(user.updatedAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+        </div>
+
+        <div th:if="${!isPrivateAndNotFriend}" class="user-posts-section">
+            <h3>Publicaciones de <span th:text="${user.username}"></span></h3>
+            <div th:if="${userPosts.isEmpty()}">
+                <p th:text="${isCurrentUser ? 'Aún no has hecho ninguna publicación.' : 'Este usuario aún no ha hecho ninguna publicación.'}"></p>
+            </div>
+            <div th:each="post : ${userPosts}" class="post-card">
+                <div class="post-header">
+                    <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                         th:src="${post.user.profilePictureUrl}"
+                         alt="Foto de perfil"
+                         class="profile-picture-small">
+                    <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                         th:src="@{/images/default-profile.png}"
+                         alt="Foto de perfil por defecto"
+                         class="profile-picture-small">
+                    <div class="post-author-info">
+                        <strong th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></strong>
+                        <span th:text="'@' + ${post.user.username}"></span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <p th:text="${post.content}"></p>
+                </div>
+                <div th:if="${post.imageUrl != null and post.imageUrl != ''}" class="post-media">
+                    <img th:src="${post.imageUrl}" alt="Imagen de la publicación">
+                </div>
+                <div th:if="${post.videoUrl != null and post.videoUrl != ''}" class="post-media">
+                    <video controls>
+                        <source th:src="${post.videoUrl}" type="video/mp4">
+                        Tu navegador no soporta el elemento de video.
+                    </video>
+                </div>
+                <div class="post-footer">
+                    <div class="post-meta">
+                        <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:if="${(isCurrentUser and user.id == post.user.id) or (!isCurrentUser and user.id == post.user.id)}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                            <input type="hidden" name="postId" th:value="${post.id}">
+                            <button type="submit" class="delete-button">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${isPrivateAndNotFriend}" class="private-profile-message">
+            <p>Este perfil es privado. Solo los amigos pueden ver las publicaciones.</p>
+        </div>
+
+        <div class="action-buttons" style="margin-top: 40px;">
+            <a th:href="@{/home}">Volver al Inicio</a>
+        </div>
+    </div>
+</body>
+</html>

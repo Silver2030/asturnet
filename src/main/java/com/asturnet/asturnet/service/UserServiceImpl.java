@@ -8,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional; // <-- ¡Importación necesaria para Optional!
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -56,6 +58,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado por email: " + email));
     }
+
+    // --- ¡NUEVOS MÉTODOS AÑADIDOS! ---
+
+    @Override
+    public Optional<User> findById(Long id) {
+        // JpaRepository ya tiene este método.
+        return userRepository.findById(id);
+    }
+
+    @Override
+    @Transactional // Se recomienda para operaciones de escritura en DB
+    public User updateUser(User user) {
+        // Simple delegación al repositorio para guardar un objeto User ya modificado.
+        // Aquí podrías añadir lógica de validación o negocio si fuera necesario antes de guardar.
+        return userRepository.save(user);
+    }
+
+    // --- MÉTODO updateProfile YA EXISTENTE ---
 
     @Override
     @Transactional

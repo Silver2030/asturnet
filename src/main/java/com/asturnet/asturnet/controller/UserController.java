@@ -21,39 +21,65 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/profile/edit")
-    public String showEditProfilePage(@AuthenticationPrincipal UserDetails currentUser, Model model) {
-        // Obtenemos el usuario de nuestra base de datos usando el username de Spring Security
-        User user = userService.findByUsername(currentUser.getUsername());
-        model.addAttribute("user", user); // Añadimos el objeto User al modelo
-        // También podríamos añadir un UserProfileUpdateRequest vacío si lo necesitáramos para el formulario
-        // model.addAttribute("profileUpdateRequest", new UserProfileUpdateRequest());
-        return "edit-profile"; // Devuelve la plantilla edit-profile.html
+    // Método para ver el propio perfil del usuario logueado
+    @GetMapping("/profile")
+    public String viewOwnProfile(@AuthenticationPrincipal UserDetails currentUserDetails, Model model) {
+        if (currentUserDetails == null) {
+            return "redirect:/login";
+        }
+
+        User currentUser = userService.findByUsername(currentUserDetails.getUsername());
+        model.addAttribute("user", currentUser);
+        model.addAttribute("isCurrentUser", true);
+
+        if (model.containsAttribute("successMessage")) {
+            model.addAttribute("successMessage", model.getAttribute("successMessage"));
+        }
+        if (model.containsAttribute("errorMessage")) {
+            model.addAttribute("errorMessage", model.getAttribute("errorMessage"));
+        }
+
+        return "profile";
     }
 
+    // Muestra el formulario de edición de perfil
+    @GetMapping("/profile/edit")
+    public String showEditProfilePage(@AuthenticationPrincipal UserDetails currentUserDetails, Model model) {
+        User user = userService.findByUsername(currentUserDetails.getUsername());
+        model.addAttribute("user", user);
+
+        // *** CORRECCIÓN AQUÍ: Usar constructor por defecto y setters ***
+        UserProfileUpdateRequest profileUpdateRequest = new UserProfileUpdateRequest();
+        profileUpdateRequest.setFullName(user.getFullName());
+        profileUpdateRequest.setBio(user.getBio());
+        profileUpdateRequest.setProfilePictureUrl(user.getProfilePictureUrl());
+        profileUpdateRequest.setIsPrivate(user.getIsPrivate()); // Asegúrate de que User tiene getIsPrivate()
+
+        model.addAttribute("profileUpdateRequest", profileUpdateRequest);
+
+        if (model.containsAttribute("successMessage")) {
+            model.addAttribute("successMessage", model.getAttribute("successMessage"));
+        }
+        if (model.containsAttribute("errorMessage")) {
+            model.addAttribute("errorMessage", model.getAttribute("errorMessage"));
+        }
+
+        return "edit-profile";
+    }
+
+    // Procesa el formulario de edición de perfil
     @PostMapping("/profile/edit")
-    public String updateProfile(@AuthenticationPrincipal UserDetails currentUser,
-                                @ModelAttribute UserProfileUpdateRequest request, // Captura los datos del formulario
+    public String updateProfile(@AuthenticationPrincipal UserDetails currentUserDetails,
+                                @ModelAttribute UserProfileUpdateRequest request,
                                 RedirectAttributes redirectAttributes) {
         try {
-            // Obtenemos el ID de nuestro usuario para pasarlo al servicio
-            User user = userService.findByUsername(currentUser.getUsername());
+            User user = userService.findByUsername(currentUserDetails.getUsername());
             userService.updateProfile(user.getId(), request);
             redirectAttributes.addFlashAttribute("successMessage", "Perfil actualizado exitosamente.");
-            return "redirect:/home"; // Redirige a la página de inicio o a la de perfil
+            return "redirect:/profile";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar perfil: " + e.getMessage());
-            return "redirect:/profile/edit"; // Vuelve a la página de edición con el error
+            return "redirect:/profile/edit";
         }
     }
-
-    // Opcional: Una página para ver el perfil (podría ser el mismo usuario o ver otros)
-    @GetMapping("/profile")
-    public String viewMyProfile(@AuthenticationPrincipal UserDetails currentUser, Model model) {
-        User user = userService.findByUsername(currentUser.getUsername());
-        model.addAttribute("user", user);
-        return "view-profile"; // Una nueva plantilla para ver el perfil
-    }
-
-    // Más tarde, podrías tener @GetMapping("/profile/{username}") para ver perfiles de otros
 }

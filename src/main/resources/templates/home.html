@@ -146,6 +146,13 @@
             font-size: 1.1em;
             color: #007bff;
         }
+        .post-author-info strong a { /* Estilo para el enlace del nombre de usuario */
+            text-decoration: none;
+            color: #007bff;
+        }
+        .post-author-info strong a:hover {
+            text-decoration: underline;
+        }
         .post-author-info span {
             font-size: 0.9em;
             color: #666;
@@ -270,6 +277,13 @@
             color: #007bff;
             font-size: 0.9em;
         }
+        .comment-author a { /* Estilo para el enlace del autor del comentario */
+            text-decoration: none;
+            color: #007bff;
+        }
+        .comment-author a:hover {
+            text-decoration: underline;
+        }
         .comment-date {
             font-size: 0.75em;
             color: #999;
@@ -346,7 +360,7 @@
                      alt="Foto de perfil por defecto"
                      class="profile-picture">
                 <div class="post-author-info">
-                    <strong th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></strong>
+                    <strong><a th:href="@{'/profile/' + ${post.user.username}}" th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></a></strong>
                     <span th:text="'@' + ${post.user.username}"></span>
                 </div>
             </div>
@@ -400,7 +414,7 @@
                 <div th:if="${postComments.get(post.id) != null and not postComments.get(post.id).isEmpty()}" class="comment-list">
                     <div th:each="comment : ${postComments.get(post.id)}" class="comment-item">
                         <div class="comment-header">
-                            <span class="comment-author" th:text="${comment.user.fullName != null and comment.user.fullName != '' ? comment.user.fullName : comment.user.username}"></span>
+                            <span class="comment-author"><a th:href="@{'/profile/' + ${comment.user.username}}" th:text="${comment.user.fullName != null and comment.user.fullName != '' ? comment.user.fullName : comment.user.username}"></a></span>
                             <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
                         </div>
                         <p class="comment-content-text" th:text="${comment.content}"></p>
