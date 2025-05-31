@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.username} + ' - Perfil de Usuario - AsturNet'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .profile-header {
+            margin-bottom: 25px;
+        }
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #007bff;
+            margin-bottom: 15px;
+            background-color: #eee; /* Fallback color */
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .username {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .profile-detail {
+            text-align: left;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .profile-detail strong {
+            display: inline-block;
+            width: 120px; /* Alineación para etiquetas */
+            color: #555;
+        }
+        .profile-detail p {
+            margin: 0;
+        }
+        .bio {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .action-buttons a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .action-buttons a:hover {
+            background-color: #0056b3;
+        }
+        .private-badge {
+            background-color: #ffc107;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-header">
+            <img th:if="${user.profilePictureUrl != null and user.profilePictureUrl != ''}"
+                 th:src="${user.profilePictureUrl}"
+                 alt="Foto de perfil"
+                 class="profile-picture">
+            <img th:unless="${user.profilePictureUrl != null and user.profilePictureUrl != ''}"
+                 th:src="@{/images/default-profile.png}"
+                 alt="Foto de perfil por defecto"
+                 class="profile-picture">
+
+            <h1 th:text="${user.fullName != null and user.fullName != '' ? user.fullName : user.username}"></h1>
+            <p class="username">@<span th:text="${user.username}"></span>
+                 <span th:if="${user.isPrivate}" class="private-badge">Privado</span>
+            </p>
+        </div>
+
+        <div class="profile-details">
+            <div class="profile-detail">
+                <strong>Email:</strong> <span th:text="${user.email}"></span>
+            </div>
+            <div class="profile-detail bio">
+                <strong>Biografía:</strong>
+                <p th:text="${user.bio != null and user.bio != '' ? user.bio : 'No hay biografía disponible.'}"></p>
+            </div>
+            <div class="profile-detail">
+                <strong>Nivel de Privacidad:</strong> <span th:text="${user.privacyLevel.name()}"></span>
+            </div>
+            <div class="profile-detail">
+                <strong>Miembro desde:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <div class="profile-detail">
+                <strong>Última actualización:</strong> <span th:text="${#temporals.format(user.updatedAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a th:href="@{/profile/edit}">Editar Perfil</a>
+            <a th:href="@{/home}">Volver al Inicio</a>
+        </div>
+    </div>
+</body>
+</html>
