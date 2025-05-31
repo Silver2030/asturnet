@@ -2,11 +2,10 @@ package com.asturnet.asturnet.controller;
 
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
+import com.asturnet.asturnet.model.Like; // Importar la entidad Like
 import com.asturnet.asturnet.service.PostService;
-import com.asturnet.asturnet.service.UserService; // Necesitamos UserService para obtener el usuario actual
-
-import java.util.List;
-
+import com.asturnet.asturnet.service.UserService;
+import com.asturnet.asturnet.service.LikeService; // Importar LikeService
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -16,41 +15,59 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import java.util.Map; // Para el mapa de likes
+import java.util.HashMap; // Para el mapa de likes
+
 @Controller
 public class PostController {
 
     private final PostService postService;
-    private final UserService userService; // Inyectamos UserService
+    private final UserService userService;
+    private final LikeService likeService; // Inyectamos LikeService
 
-    public PostController(PostService postService, UserService userService) {
+    public PostController(PostService postService, UserService userService, LikeService likeService) { // Constructor actualizado
         this.postService = postService;
         this.userService = userService;
+        this.likeService = likeService; // Asignamos LikeService
     }
 
-    // Ruta para mostrar la página de inicio (feed de publicaciones)
-    @GetMapping("/home") // Sobreescribe el mapeo /home si ya lo tenías en otro controlador
+    @GetMapping("/home")
     public String home(Model model, @AuthenticationPrincipal UserDetails currentUser) {
-        // Obtenemos el usuario actual autenticado
         User user = null;
+        Map<Long, Boolean> userLikesPost = new HashMap<>(); // Mapa para saber si el usuario actual le dio like a cada post
+        Map<Long, Long> postLikesCount = new HashMap<>(); // Mapa para el conteo de likes de cada post
+
         if (currentUser != null) {
             user = userService.findByUsername(currentUser.getUsername());
             model.addAttribute("username", user.getUsername());
-            model.addAttribute("userId", user.getId()); // Pasa el ID del usuario
+            model.addAttribute("userId", user.getId());
         }
 
-        // Obtener todas las publicaciones para el feed
         List<Post> posts = postService.getAllPosts();
-        model.addAttribute("posts", posts); // Agrega la lista de posts al modelo
+        model.addAttribute("posts", posts);
 
-        // Para el formulario de creación de posts (opcional, pero buena práctica)
+        if (user != null) { // Solo si hay un usuario logueado, verificamos sus likes y el conteo
+            for (Post post : posts) {
+                userLikesPost.put(post.getId(), likeService.isLikedByUser(user, post));
+                postLikesCount.put(post.getId(), likeService.getLikesCountForPost(post));
+            }
+        } else { // Si no hay usuario logueado, aún podemos obtener el conteo de likes
+            for (Post post : posts) {
+                postLikesCount.put(post.getId(), likeService.getLikesCountForPost(post));
+            }
+        }
+        model.addAttribute("userLikesPost", userLikesPost); // Pasa el mapa de likes del usuario
+        model.addAttribute("postLikesCount", postLikesCount); // Pasa el mapa de conteo de likes
+
+
         model.addAttribute("postContent", "");
         model.addAttribute("postImageUrl", "");
         model.addAttribute("postVideoUrl", "");
 
-        return "home"; // Devuelve la plantilla home.html
+        return "home";
     }
 
-    // Ruta para crear una nueva publicación
     @PostMapping("/posts/create")
     public String createPost(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("content") String content,
@@ -64,10 +81,9 @@ public class PostController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al crear publicación: " + e.getMessage());
         }
-        return "redirect:/home"; // Redirige de vuelta a la página de inicio
+        return "redirect:/home";
     }
 
-    // Ruta para eliminar una publicación
     @PostMapping("/posts/delete")
     public String deletePost(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("postId") Long postId,
@@ -78,6 +94,22 @@ public class PostController {
             redirectAttributes.addFlashAttribute("successMessage", "Publicación eliminada exitosamente!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar publicación: " + e.getMessage());
+        }
+        return "redirect:/home";
+    }
+
+    // Nuevo endpoint para dar/quitar like
+    @PostMapping("/posts/toggleLike")
+    public String toggleLike(@AuthenticationPrincipal UserDetails currentUser,
+                             @RequestParam("postId") Long postId,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.findByUsername(currentUser.getUsername());
+            Post post = postService.getPostById(postId); // Obtener el post
+            likeService.toggleLike(user, post);
+            // No hay mensaje de éxito/error aquí, ya que el like/dislike es inmediato
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al procesar like: " + e.getMessage());
         }
         return "redirect:/home"; // Redirige de vuelta a la página de inicio
     }

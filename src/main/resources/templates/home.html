@@ -172,7 +172,8 @@
             padding-top: 10px;
             margin-top: 15px;
         }
-        .post-footer .delete-button {
+        /* Estilos para el botón de eliminar post */
+        .delete-button {
             background-color: #f44336;
             color: white;
             padding: 5px 10px;
@@ -182,8 +183,37 @@
             font-size: 0.8em;
             transition: background-color 0.3s ease;
         }
-        .post-footer .delete-button:hover {
+        .delete-button:hover {
             background-color: #d32f2f;
+        }
+        /* Estilos para el botón de like */
+        .like-button {
+            background-color: #6c757d; /* Gris por defecto */
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: background-color 0.3s ease;
+        }
+        .like-button:hover {
+            background-color: #5a6268;
+        }
+        .like-button.liked {
+            background-color: #ff4500; /* Naranja rojizo para "liked" */
+        }
+        .like-button.liked:hover {
+            background-color: #cc3700;
+        }
+        .post-actions {
+            display: flex; /* Añadir display flex para alinear like y delete */
+            gap: 10px; /* Espacio entre botones */
+        }
+        .like-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 </head>
@@ -252,12 +282,27 @@
                 </video>
             </div>
             <div class="post-footer">
-                <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
-                <div sec:authorize="isAuthenticated()">
-                    <form th:if="${userId == post.user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
-                        <input type="hidden" name="postId" th:value="${post.id}">
-                        <button type="submit" class="delete-button">Eliminar</button>
-                    </form>
+                <div class="post-meta">
+                    <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                </div>
+                <div class="post-actions">
+                    <div sec:authorize="isAuthenticated()" class="like-info">
+                        <form th:action="@{/posts/toggleLike}" method="post" style="display:inline;">
+                            <input type="hidden" name="postId" th:value="${post.id}">
+                            <button type="submit"
+                                    th:classappend="${userLikesPost.get(post.id)} ? 'liked' : ''"
+                                    class="like-button">
+                                <span th:text="${userLikesPost.get(post.id)} ? 'Ya no me gusta' : 'Me gusta'"></span>
+                            </button>
+                        </form>
+                        <span th:text="${postLikesCount.get(post.id)} + ' likes'"></span>
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:if="${userId == post.user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
+                            <input type="hidden" name="postId" th:value="${post.id}">
+                            <button type="submit" class="delete-button">Eliminar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
