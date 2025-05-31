@@ -411,17 +411,34 @@
             </form>
         </div>
 
-        <h3>Publicaciones recientes</h3>
-        <div th:if="${posts.isEmpty()}">
-            <p>No hay publicaciones aún. ¡Sé el primero en publicar!</p>
+    <h3>Publicaciones recientes</h3>
+    <div th:if="${posts.isEmpty()}">
+        <p>No hay publicaciones aún. ¡Sé el primero en publicar!</p>
+    </div>
+    <div th:each="post : ${posts}" class="post-card">
+        <div class="post-header">
+            <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                th:src="${post.user.profilePictureUrl}"
+                alt="Foto de perfil"
+                class="profile-picture">
+            <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                th:src="@{/images/default-profile.png}"
+                alt="Foto de perfil por defecto"
+                class="profile-picture">
+            <div class="post-author-info">
+                <strong><a th:href="@{'/profile/' + ${post.user.username}}" th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></a></strong>
+                <span th:text="'@' + ${post.user.username}"></span>
+            </div>
         </div>
-        <div th:each="post : ${posts}" class="post-card" style="border: 1px solid red; margin-bottom: 10px; padding: 10px;">
-            <h3 th:text="${post.content}">Contenido del post (placeholder)</h3>
-            <p>ID del Post: <span th:text="${post.id}"></span></p>
-            <p>Autor: <span th:text="${post.user.username}"></span></p>
-            <p>Fecha: <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
-            <hr>
+        <div class="post-content">
+            <p th:text="${post.content}"></p>
+        </div>
+        <div class="post-footer">
+            <div class="post-meta">
+                <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
         </div>
         </div>
+    </div>
 </body>
 </html>
