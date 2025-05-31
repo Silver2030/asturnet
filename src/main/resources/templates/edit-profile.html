@@ -117,8 +117,7 @@
             </div>
 
             <div class="form-group">
-                <input type="hidden" name="isPrivate" value="false">
-                <input type="checkbox" id="isPrivate" name="isPrivate" th:checked="${user.isPrivate}">
+                <input type="checkbox" id="isPrivate" th:field="*{isPrivate}">
                 <label for="isPrivate">Marcar perfil como privado</label>
             </div>
 
