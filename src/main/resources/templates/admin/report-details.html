@@ -222,7 +222,7 @@
                 Acciones sobre la Publicación Reportada
             </div>
             <div class="card-body">
-                <form th:action="@{/admin/posts/delete}" method="post" style="display:inline;">
+                <form th:action="@{/posts/delete}" method="post" style="display:inline;">
                     <input type="hidden" name="postId" th:value="${report.reportedPost.id}">
                     <button type="submit" class="btn btn-danger"
                             th:onclick="|return confirm('¿Estás seguro de que quieres ELIMINAR este post (ID: ${report.reportedPost.id})?');|" > Eliminar Post (<span th:text="${report.reportedPost.id}"></span>)
