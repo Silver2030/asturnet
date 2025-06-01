@@ -42,7 +42,7 @@ public class ReportController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al reportar la publicación: " + e.getMessage());
             // Considera loggear el error para debugging
         }
-        return "redirect:/posts/" + postId;
+        return "redirect:/home";
     }
 
     @PostMapping("/report/user")

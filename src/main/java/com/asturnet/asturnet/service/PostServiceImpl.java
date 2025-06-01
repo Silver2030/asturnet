@@ -10,6 +10,12 @@ import com.asturnet.asturnet.repository.FriendsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// IMPORTS NECESARIOS PARA VERIFICAR ROL DE ADMIN
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +35,13 @@ public class PostServiceImpl implements PostService {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.friendsRepository = friendsRepository;
+    }
+
+    // Método auxiliar para verificar si el usuario actual es admin
+    private boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated() &&
+               authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
     @Override
@@ -65,15 +78,18 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(Long postId, User currentUser) {
+    public void deletePost(Long postId, User currentUser) { // 'currentUser' es el usuario que intenta eliminar
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Publicación no encontrada con ID: " + postId));
 
-        if (!post.getUser().getId().equals(currentUser.getId())) {
+        // --- Lógica de autorización mejorada en el servicio ---
+        // El usuario puede eliminar si es el propietario del post O si es un ADMIN
+        if (post.getUser().getId().equals(currentUser.getId()) || isAdmin()) {
+            postRepository.delete(post);
+        } else {
             throw new RuntimeException("No tienes permiso para eliminar esta publicación.");
         }
-
-        postRepository.delete(post);
+        // --- Fin de la lógica de autorización mejorada ---
     }
 
     @Override
@@ -82,7 +98,6 @@ public class PostServiceImpl implements PostService {
         return postRepository.findAllWithUserAndCommentsOrderedByCreatedAtDesc();
     }
 
-    // ***** IMPLEMENTACIÓN CORREGIDA DEL MÉTODO getHomeFeedPosts *****
     @Override
     @Transactional(readOnly = true)
     public List<Post> getHomeFeedPosts(User currentUser) {
@@ -103,9 +118,6 @@ public class PostServiceImpl implements PostService {
             friendAuthors = userRepository.findAllById(friendIds);
         }
 
-        // *** LA LÍNEA QUE GENERA EL ERROR Y DEBE SER REEMPLAZADA ES ESTA: ***
-        // return postRepository.findByUserInWithUserAndCommentsOrderByCreatedAtDesc(authorsToFetch);
-        // *** DEBE SER ESTA OTRA: ***
-        return postRepository.findHomeFeedPosts(currentUser, friendAuthors); // <-- ¡CORRECCIÓN AQUÍ!
+        return postRepository.findHomeFeedPosts(currentUser, friendAuthors);
     }
 }

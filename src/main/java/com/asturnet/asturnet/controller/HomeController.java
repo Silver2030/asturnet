@@ -1,6 +1,6 @@
 package com.asturnet.asturnet.controller;
 
-import com.asturnet.asturnet.model.FriendshipStatus; // Mantener si lo usas en otras partes
+import com.asturnet.asturnet.model.FriendshipStatus;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.service.FriendsService;
@@ -8,13 +8,16 @@ import com.asturnet.asturnet.service.LikeService;
 import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication; // Necesario para SecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolder; // Necesario para SecurityContextHolder
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // Necesario para ROLE_ADMIN
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.util.ArrayList; // Necesario si manejas listas vacías
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,13 +39,25 @@ public class HomeController {
         this.likeService = likeService;
     }
 
+    // Método auxiliar para verificar si el usuario actual es admin
+    // Este método ya lo tienes en PostController, pero lo duplicamos aquí para la lógica de visualización
+    // (o podrías tener un servicio de utilidad de seguridad si se usa mucho)
+    private boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated() &&
+               authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
     @GetMapping("/home")
     public String home(Model model, Principal principal) {
-        List<Post> postsToShow = new ArrayList<>(); // Inicializa una lista vacía para los posts
+        List<Post> postsToShow = new ArrayList<>();
         Map<Long, Boolean> userLikesPost = new HashMap<>();
         Map<Long, Long> postLikesCount = new HashMap<>();
         Long currentUserId = null;
-        User currentUser = null; // Declarar currentUser aquí para que sea accesible en todo el método
+        User currentUser = null;
+
+        // Añadir isAdmin al modelo de forma temprana
+        model.addAttribute("isAdmin", isAdmin()); // <--- ¡Añadido aquí!
 
         if (principal != null) {
             String currentUsername = principal.getName();
@@ -50,36 +65,28 @@ public class HomeController {
 
             if (currentUser != null) {
                 currentUserId = currentUser.getId();
-                model.addAttribute("username", currentUser.getUsername()); // Añadir el username al modelo aquí
-                model.addAttribute("currentUser", currentUser); // Pasar el currentUser al modelo para Thymeleaf
+                model.addAttribute("username", currentUser.getUsername());
+                model.addAttribute("currentUser", currentUser);
 
-                // ***** APLICAR FILTRO AQUÍ *****
-                postsToShow = postService.getHomeFeedPosts(currentUser); // <--- ¡CAMBIO CLAVE!
+                // Aplicar filtro de posts
+                postsToShow = postService.getHomeFeedPosts(currentUser);
             } else {
                 System.out.println("Current User not found in DB for principal: " + currentUsername);
-                model.addAttribute("username", "Invitado"); // Si el usuario no se encuentra en DB
+                model.addAttribute("username", "Invitado");
             }
         } else {
-            // Usuario no autenticado: no se muestran posts o se muestran solo los públicos si existiera esa lógica
-            // Por ahora, si no hay principal, no debería mostrar nada (o redirigir al login)
-            // Ya que nuestro getHomeFeedPosts requiere un currentUser.
-            System.out.println("User not authenticated. Redirecting to login or showing empty feed.");
-            // Si /home está protegido por Spring Security, esta sección se alcanzará raramente.
-            // Si permites acceso a /home sin autenticación, podrías querer mostrar un feed vacío o un mensaje.
-            // Por el momento, la lógica del feed depende del usuario autenticado.
+            System.out.println("User not authenticated. Showing empty feed.");
             model.addAttribute("username", "Invitado");
-            model.addAttribute("posts", new ArrayList<>()); // No hay posts para invitados
+            // Asegurarse de que todas las variables del modelo existan para evitar errores en Thymeleaf
+            model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("userLikesPost", new HashMap<>());
             model.addAttribute("postLikesCount", new HashMap<>());
             model.addAttribute("userId", null);
-            return "home"; // O "redirect:/login"; si quieres forzar el login
+            return "home";
         }
 
-        // Si currentUser es null aquí (porque principal era null o no se encontró el usuario),
-        // postsToShow seguirá siendo una lista vacía, lo cual es correcto.
-        // Recalculamos los likes y los conteos para los 'postsToShow' (que ahora están filtrados)
-        for (Post post : postsToShow) { // <-- Iterar sobre la lista FILTRADA
-            if (currentUser != null) { // Solo si hay un usuario autenticado para verificar likes
+        for (Post post : postsToShow) {
+            if (currentUser != null) {
                 boolean userHasLiked = likeService.isLikedByUser(currentUser, post);
                 userLikesPost.put(post.getId(), userHasLiked);
             }
@@ -87,8 +94,7 @@ public class HomeController {
             postLikesCount.put(post.getId(), likesCount);
         }
 
-        // Añadir los posts filtrados y los mapas de likes al modelo
-        model.addAttribute("posts", postsToShow); // <--- ¡Aquí se añade la lista FILTRADA!
+        model.addAttribute("posts", postsToShow);
         model.addAttribute("userLikesPost", userLikesPost);
         model.addAttribute("postLikesCount", postLikesCount);
         model.addAttribute("userId", currentUserId);
@@ -97,36 +103,42 @@ public class HomeController {
     }
 
     @GetMapping("/search")
-    public String searchUsers(@RequestParam(value = "query", required = false) String query, Model model) {
-        List<User> searchResults = List.of();
+    public String searchUsers(@RequestParam(value = "query", required = false) String query, Model model, Principal principal) {
+        List<User> searchResults = new ArrayList<>(); // Inicializar para evitar null
+        
+        // Asegúrate de pasar isAdmin al modelo de búsqueda también si el HTML de búsqueda usa encabezados o pie de página comunes
+        model.addAttribute("isAdmin", isAdmin()); 
 
         if (query != null && !query.trim().isEmpty()) {
             searchResults = userService.searchUsers(query.trim());
             model.addAttribute("query", query);
         }
 
-        // Necesitas el currentUser para determinar el estado de amistad en los resultados de búsqueda
-        Principal principal = (Principal) model.getAttribute("principal"); // No puedes obtenerlo así
-        // Lo correcto es:
-        // Principal principalAuth = SecurityContextHolder.getContext().getAuthentication();
-        // Si Principal principal no viene como argumento en searchUsers, necesitas obtenerlo de otra forma
-        // Si solo se usa para mostrar, no hay problema. Si se usa para logica de amistad, necesitas el principal.
-
+        // Obtener el principal directamente como argumento
+        // Principal principal ya está disponible aquí por el parámetro del método
         if (principal != null) {
             String currentUsername = principal.getName();
             User currentUser = userService.findByUsername(currentUsername);
             if (currentUser != null) {
                 Map<Long, FriendshipStatus> friendshipStatuses = new HashMap<>();
                 for (User user : searchResults) {
-                    if (!user.equals(currentUser)) { // No mostrar estado de amistad consigo mismo
+                    if (!user.equals(currentUser)) {
                         FriendshipStatus status = friendsService.getFriendshipStatus(currentUser, user);
                         friendshipStatuses.put(user.getId(), status);
                     }
                 }
                 model.addAttribute("friendshipStatuses", friendshipStatuses);
-                model.addAttribute("currentUserId", currentUser.getId()); // Para el botón de enviar/aceptar solicitud
+                model.addAttribute("currentUserId", currentUser.getId());
             }
+            model.addAttribute("currentUser", currentUser); // <--- Pasar currentUser al modelo de búsqueda
+        } else {
+            // Si no hay principal, el usuario no está autenticado. 
+            // Asegúrate de que las variables del modelo necesarias en Thymeleaf existan.
+            model.addAttribute("currentUser", null); // Para evitar NullPointer en Thymeleaf
+            model.addAttribute("currentUserId", null);
+            model.addAttribute("friendshipStatuses", new HashMap<>());
         }
+        
         model.addAttribute("searchResults", searchResults);
         return "search-results";
     }

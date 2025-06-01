@@ -158,6 +158,135 @@
         .action-button.unban-button:hover {
             background-color: #218838;
         }
+
+        /* Estilos para el contenedor de comentarios */
+.comments-section {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.comments-section h4 {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Estilos para cada comentario individual */
+.comment {
+    background-color: #f9f9f9; /* Fondo claro para cada comentario */
+    border: 1px solid #e0e0e0; /* Borde sutil */
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03); /* Sombra suave */
+    display: flex; /* Para controlar la disposición de los elementos internos */
+    flex-direction: column; /* Apila el header y el contenido */
+}
+
+.comment-header {
+    display: flex; /* Para alinear la foto, nombre y @username */
+    align-items: center;
+    margin-bottom: 5px;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
+
+.comment-header .profile-picture-small {
+    width: 30px; /* Tamaño de foto de perfil en comentarios */
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+}
+
+.comment-header strong a {
+    color: #007bff; /* Color del enlace del nombre de usuario */
+    text-decoration: none;
+    font-size: 0.95em;
+    margin-right: 5px; /* Espacio después del nombre */
+}
+
+.comment-header strong a:hover {
+    text-decoration: underline;
+}
+
+.comment-header span { /* Para el @username */
+    color: #666;
+    font-size: 0.85em;
+    margin-right: 10px; /* Espacio antes de la fecha */
+}
+
+.comment-meta { /* Para la fecha/hora del comentario */
+    font-size: 0.75em;
+    color: #999;
+    margin-left: auto; /* Empuja la fecha a la derecha si hay espacio */
+    white-space: nowrap; /* Evita que la fecha se rompa en varias líneas */
+}
+
+.comment-content {
+    margin: 5px 0 10px 0;
+    line-height: 1.4;
+    color: #444;
+}
+
+.comment-actions {
+    text-align: right;
+    margin-top: 5px; /* Espacio entre el contenido y los botones */
+}
+
+.comment-actions .delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75em;
+    transition: background-color 0.2s ease;
+}
+
+.comment-actions .delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Estilos para el formulario de comentarios */
+.add-comment-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+}
+
+.comment-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    align-self: flex-end;
+}
+
+.comment-form button:hover {
+    background-color: #0056b3;
+}
     </style>
 </head>
 <body>
@@ -320,89 +449,126 @@
                 </div>
             </div>
 
-            <div class="user-posts-section">
-                <h3>Publicaciones de <span th:text="${user.username}"></span></h3>
-                <div th:if="${userPosts.isEmpty()}">
-                    <p th:text="${isCurrentUser ? 'Aún no has hecho ninguna publicación.' : 'Este usuario aún no ha hecho ninguna publicación.'}"></p>
-                </div>
-                <div th:each="post : ${userPosts}" class="post-card">
-                    <div class="post-header">
-                        <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
-                             th:src="${post.user.profilePictureUrl}"
-                             alt="Foto de perfil"
-                             class="profile-picture-small">
-                        <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
-                             th:src="@{/images/default-profile.png}"
-                             alt="Foto de perfil por defecto"
-                             class="profile-picture-small">
-                        <div class="post-author-info">
-                            <strong><a th:href="@{'/profile/' + ${post.user.username}}" th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></a></strong>
-                            <span th:text="'@' + ${post.user.username}"></span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        <p th:text="${post.content}"></p>
-                    </div>
-                    <div th:if="${post.imageUrl != null and post.imageUrl != ''}" class="post-media">
-                        <img th:src="${post.imageUrl}" alt="Imagen de la publicación">
-                    </div>
-                    <div th:if="${post.videoUrl != null and post.videoUrl != ''}" class="post-media">
-                        <video controls>
-                            <source th:src="${post.videoUrl}" type="video/mp4">
-                            Tu navegador no soporta el elemento de video.
-                        </video>
-                    </div>
-                    <div class="post-footer">
-                        <div class="post-meta">
-                            <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
-                        </div>
-                        <div sec:authorize="isAuthenticated()">
-                            <form th:if="${isCurrentUser and post.user.id == user.id}" th:action="@{/posts/delete}" method="post" style="display:inline;">
-                                <input type="hidden" name="postId" th:value="${post.id}">
-                                <button type="submit" class="delete-button">Eliminar</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="user-friends-section" style="margin-top: 40px; text-align: left;">
-                <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
-                    <span th:if="${isCurrentUser}">Mis Amigos</span> <span th:unless="${isCurrentUser}">Amigos de <span th:text="${user.username}"></span></span> </h3>
-
-                <div th:if="${#lists.isEmpty(friendsList)}">
-                    <p th:text="${isCurrentUser ? 'Aún no tienes amigos.' : 'Este usuario aún no tiene amigos.'}"
-                       style="text-align: center; color: #777;"></p>
-                </div>
-                <div th:unless="${#lists.isEmpty(friendsList)}">
-                    <ul style="list-style: none; padding: 0;">
-                        <li th:each="friend : ${friendsList}" style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
-                            <img th:if="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
-                                 th:src="${friend.profilePictureUrl}"
-                                 alt="Foto de perfil del amigo"
-                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
-                            <img th:unless="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
-                                 th:src="@{/images/default-profile.png}"
-                                 alt="Foto de perfil por defecto"
-                                 class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
-                            <a th:href="@{'/profile/' + ${friend.username}}" th:text="${friend.fullName != null and friend.fullName != '' ? friend.fullName : friend.username}"
-                               style="text-decoration: none; color: #007bff; font-weight: bold;"></a>
-                            <span th:text="' (@' + ${friend.username} + ')'" style="color: #666; font-size: 0.9em; margin-left: 5px;"></span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div th:if="${isPrivateAndNotFriend}" class="private-profile-message">
-            <p>Este perfil es privado. Solo los amigos pueden ver los detalles y publicaciones.</p>
-            <p>Puedes enviarle una solicitud de amistad si lo deseas.</p>
-        </div>
-
-        <div class="action-buttons" style="margin-top: 40px;">
-            <a th:href="@{/home}" class="action-button">Volver al Inicio</a>
-        </div>
+          <div class="user-posts-section">
+    <h3>Publicaciones de <span th:text="${user.username}"></span></h3>
+    <div th:if="${userPosts.isEmpty()}">
+        <p th:text="${isCurrentUser ? 'Aún no has hecho ninguna publicación.' : 'Este usuario aún no ha hecho ninguna publicación.'}"></p>
     </div>
+    <div th:each="post : ${userPosts}" class="post-card">
+        <div class="post-header">
+            <img th:if="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                 th:src="${post.user.profilePictureUrl}"
+                 alt="Foto de perfil"
+                 class="profile-picture-small">
+            <img th:unless="${post.user.profilePictureUrl != null and post.user.profilePictureUrl != ''}"
+                 th:src="@{/images/default-profile.png}"
+                 alt="Foto de perfil por defecto"
+                 class="profile-picture-small">
+            <div class="post-author-info">
+                <strong><a th:href="@{'/profile/' + ${post.user.username}}" th:text="${post.user.fullName != null and post.user.fullName != '' ? post.user.fullName : post.user.username}"></a></strong>
+                <span th:text="'@' + ${post.user.username}"></span>
+            </div>
+        </div>
+        <div class="post-content">
+            <p th:text="${post.content}"></p>
+        </div>
+        <div th:if="${post.imageUrl != null and post.imageUrl != ''}" class="post-media">
+            <img th:src="${post.imageUrl}" alt="Imagen de la publicación">
+        </div>
+        <div th:if="${post.videoUrl != null and post.videoUrl != ''}" class="post-media">
+            <video controls>
+                <source th:src="${post.videoUrl}" type="video/mp4">
+                Tu navegador no soporta el elemento de video.
+            </video>
+        </div>
+        <div class="post-footer">
+            <div class="post-meta">
+                <span th:text="${#temporals.format(post.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <form th:action="@{/posts/delete}" method="post" style="display:inline;"
+                      th:if="${currentUser != null and post.user.id == currentUser.id}">
+                    <input type="hidden" name="postId" th:value="${post.id}">
+                    <button type="submit" class="delete-button">Eliminar</button>
+                </form>
+                
+                <form th:action="@{/posts/delete}" method="post" style="display:inline;"
+                      sec:authorize="hasRole('ROLE_ADMIN')">
+                    <input type="hidden" name="postId" th:value="${post.id}">
+                    <button type="submit" class="delete-button">Eliminar (Admin)</button>
+                </form>
+            </div>
+        </div>
+
+    <div class="comments-section"> <h4>Comentarios (<span th:text="${post.comments != null ? post.comments.size() : 0}">0</span>)</h4>
+        <div th:each="comment : ${post.comments}" class="comment"> <div class="comment-header"> <img th:if="${comment.user != null and comment.user.profilePictureUrl != null and comment.user.profilePictureUrl != ''}"
+                     th:src="${comment.user.profilePictureUrl}"
+                     alt="Foto de perfil"
+                     class="profile-picture-small">
+                <img th:unless="${comment.user != null and comment.user.profilePictureUrl != null and comment.user.profilePictureUrl != ''}"
+                     th:src="@{/images/default-profile.png}"
+                     alt="Foto de perfil por defecto"
+                     class="profile-picture-small">
+                <strong><a th:if="${comment.user != null}" th:href="@{'/profile/' + ${comment.user.username}}" th:text="${comment.user.fullName != null and comment.user.fullName != '' ? comment.user.fullName : comment.user.username}"></a></strong>
+                <span th:if="${comment.user != null}" th:text="'@' + ${comment.user.username}"></span>
+                <span class="comment-meta" th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+            </div>
+            <p class="comment-content" th:text="${comment.content}"></p> <div sec:authorize="isAuthenticated()" class="comment-actions"> <form th:if="${currentUser != null and comment.user != null and currentUser.id == comment.user.id}" 
+                      th:action="@{/comments/delete}" method="post" style="display: inline-block;">
+                    <input type="hidden" name="commentId" th:value="${comment.id}">
+                    <button type="submit" class="delete-button">Eliminar</button>
+                </form>
+                
+                <form sec:authorize="hasRole('ROLE_ADMIN')" th:action="@{/comments/delete}" method="post" style="display: inline-block;">
+                    <input type="hidden" name="commentId" th:value="${comment.id}">
+                    <button type="submit" class="delete-button">Eliminar (Admin)</button>
+                </form>
+            </div>
+        </div>
+
+        <div sec:authorize="isAuthenticated()" class="add-comment-section">
+            <form th:action="@{/comments/create}" method="post" class="comment-form">
+                <input type="hidden" name="postId" th:value="${post.id}">
+                <textarea name="content" placeholder="Escribe un comentario..." required></textarea>
+                <button type="submit">Comentar</button>
+            </form>
+        </div>
+    </div> 
+
+    <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
+        <span th:if="${isCurrentUser}">Mis Amigos</span> <span th:unless="${isCurrentUser}">Amigos de <span th:text="${user.username}"></span></span> </h3>
+
+    <div th:if="${#lists.isEmpty(friendsList)}">
+        <p th:text="${isCurrentUser ? 'Aún no tienes amigos.' : 'Este usuario aún no tiene amigos.'}"
+           style="text-align: center; color: #777;"></p>
+    </div>
+    <div th:unless="${#lists.isEmpty(friendsList)}">
+        <ul style="list-style: none; padding: 0;">
+            <li th:each="friend : ${friendsList}" style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
+                <img th:if="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
+                     th:src="${friend.profilePictureUrl}"
+                     alt="Foto de perfil del amigo"
+                     class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                <img th:unless="${friend.profilePictureUrl != null and friend.profilePictureUrl != ''}"
+                     th:src="@{/images/default-profile.png}"
+                     alt="Foto de perfil por defecto"
+                     class="profile-picture-small" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 10px;">
+                <a th:href="@{'/profile/' + ${friend.username}}" th:text="${friend.fullName != null and friend.fullName != '' ? friend.fullName : friend.username}"
+                   style="text-decoration: none; color: #007bff; font-weight: bold;"></a>
+                <span th:text="' (@' + ${friend.username} + ')'" style="color: #666; font-size: 0.9em; margin-left: 5px;"></span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div th:if="${isPrivateAndNotFriend}" class="private-profile-message">
+    <p>Este perfil es privado. Solo los amigos pueden ver los detalles y publicaciones.</p>
+    <p>Puedes enviarle una solicitud de amistad si lo deseas.</p>
+</div>
+
+<div class="action-buttons" style="margin-top: 40px;">
+    <a th:href="@{/home}" class="action-button">Volver al Inicio</a>
+</div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

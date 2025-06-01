@@ -9,4 +9,5 @@ public interface CommentService {
     Comment createComment(User user, Post post, String content);
     List<Comment> getCommentsByPost(Post post);
     void deleteComment(Long commentId, User currentUser); // Eliminar un comentario (solo el autor o si eres el dueño del post)
+    Comment getCommentById(Long commentId);
 }

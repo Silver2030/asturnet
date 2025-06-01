@@ -3,11 +3,11 @@ package com.asturnet.asturnet.controller;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.model.Like;
-import com.asturnet.asturnet.model.Comment; // <-- IMPORTANTE: Importar Comment
+import com.asturnet.asturnet.model.Comment;
 import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
 import com.asturnet.asturnet.service.LikeService;
-import com.asturnet.asturnet.service.CommentService; // <-- IMPORTANTE: Importar CommentService
+import com.asturnet.asturnet.service.CommentService;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import org.springframework.security.core.Authentication; // Nuevo import
+import org.springframework.security.core.context.SecurityContextHolder; // Nuevo import
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // Nuevo import
+
 
 import java.util.List;
 import java.util.Map;
@@ -28,13 +33,20 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
     private final LikeService likeService;
-    private final CommentService commentService; // <-- IMPORTANTE: Inyectamos CommentService
+    private final CommentService commentService;
 
-    public PostController(PostService postService, UserService userService, LikeService likeService, CommentService commentService) { // <-- CONSTRUCTOR ACTUALIZADO
+    public PostController(PostService postService, UserService userService, LikeService likeService, CommentService commentService) {
         this.postService = postService;
         this.userService = userService;
         this.likeService = likeService;
-        this.commentService = commentService; // <-- Asignamos CommentService
+        this.commentService = commentService;
+    }
+
+    // Método auxiliar para verificar si el usuario actual es admin
+    private boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.isAuthenticated() &&
+               authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
     @PostMapping("/posts/create")
@@ -59,9 +71,19 @@ public class PostController {
                              RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findByUsername(currentUser.getUsername());
-            postService.deletePost(postId, user);
-            redirectAttributes.addFlashAttribute("successMessage", "Publicación eliminada exitosamente!");
-        } catch (RuntimeException e) {
+            Post post = postService.getPostById(postId);
+
+            // --- Lógica de autorización mejorada ---
+            // Si el usuario actual es el propietario del post O si es un ADMIN
+            if (post.getUser().getId().equals(user.getId()) || isAdmin()) {
+                postService.deletePost(postId, user); // El segundo 'user' podría ser solo para log, la eliminación no debería depender del 'user' si es admin
+                redirectAttributes.addFlashAttribute("successMessage", "Publicación eliminada exitosamente!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para eliminar esta publicación.");
+            }
+            // --- Fin de la lógica de autorización mejorada ---
+
+        } catch (RuntimeException e) { // Podrías querer una excepción más específica aquí como PostNotFoundException
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar publicación: " + e.getMessage());
         }
         return "redirect:/home";
@@ -81,35 +103,45 @@ public class PostController {
         return "redirect:/home";
     }
 
-    // <-- IMPORTANTE: Nuevo endpoint para crear un comentario
     @PostMapping("/comments/create")
     public String createComment(@AuthenticationPrincipal UserDetails currentUser,
-                                @RequestParam("postId") Long postId,
-                                @RequestParam("content") String content,
-                                RedirectAttributes redirectAttributes) {
+                                 @RequestParam("postId") Long postId,
+                                 @RequestParam("content") String content,
+                                 RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findByUsername(currentUser.getUsername());
-            Post post = postService.getPostById(postId); // Asegurarse de que el post existe
+            Post post = postService.getPostById(postId);
             commentService.createComment(user, post, content);
             redirectAttributes.addFlashAttribute("successMessage", "Comentario publicado exitosamente!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al publicar comentario: " + e.getMessage());
         }
-        return "redirect:/home"; // Redirige de vuelta a la página de inicio
+        return "redirect:/home";
     }
 
-    // <-- IMPORTANTE: Nuevo endpoint para eliminar un comentario
     @PostMapping("/comments/delete")
     public String deleteComment(@AuthenticationPrincipal UserDetails currentUser,
-                                @RequestParam("commentId") Long commentId,
-                                RedirectAttributes redirectAttributes) {
+                                 @RequestParam("commentId") Long commentId,
+                                 RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findByUsername(currentUser.getUsername());
-            commentService.deleteComment(commentId, user);
-            redirectAttributes.addFlashAttribute("successMessage", "Comentario eliminado exitosamente!");
-        } catch (RuntimeException e) {
+            Comment comment = commentService.getCommentById(commentId); // Necesitas un método para obtener el comentario por ID
+
+            // --- Lógica de autorización mejorada ---
+            // Si el usuario actual es el propietario del comentario O si es un ADMIN
+            if (comment.getUser().getId().equals(user.getId()) || isAdmin()) {
+                commentService.deleteComment(commentId, user); // El segundo 'user' podría ser solo para log
+                redirectAttributes.addFlashAttribute("successMessage", "Comentario eliminado exitosamente!");
+            } else {
+                redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para eliminar este comentario.");
+            }
+            // --- Fin de la lógica de autorización mejorada ---
+
+        } catch (RuntimeException e) { // Podrías querer una excepción más específica aquí
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar comentario: " + e.getMessage());
         }
-        return "redirect:/home"; // Redirige de vuelta a la página de inicio
+        return "redirect:/home";
     }
+
+    
 }

@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList; // Necesario para 'new java.util.ArrayList<>()'
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Collections; // <--- ¡Importa Collections!
+import java.util.Collections;
 
 @Controller
 public class ProfileController {
@@ -35,89 +35,78 @@ public class ProfileController {
         this.postService = postService;
     }
 
-    // --- Método para ver MI perfil ---
     @GetMapping("/profile")
     public String viewMyProfile(@AuthenticationPrincipal UserDetails currentUserDetails) {
         if (currentUserDetails == null) {
-            return "redirect:/login"; // Si no hay usuario logueado, redirige al login
+            return "redirect:/login";
         }
         User currentUser = userService.findByUsername(currentUserDetails.getUsername());
         if (currentUser == null) {
-            // Esto no debería ocurrir si el usuario está autenticado, pero es una buena medida de seguridad
-            return "redirect:/logout"; // O a una página de error
+            return "redirect:/logout";
         }
-        // Redirige a la URL con el nombre de usuario, que será manejada por viewOtherUserProfile
         return "redirect:/profile/" + currentUser.getUsername();
     }
 
-    // --- Método para ver el perfil de OTRO usuario (o el propio si se accede directamente con /profile/{username}) ---
     @GetMapping("/profile/{username}")
     public String viewOtherUserProfile(@PathVariable String username, Model model,
-                                       @AuthenticationPrincipal UserDetails currentUserDetails,
-                                       RedirectAttributes redirectAttributes) {
+                                         @AuthenticationPrincipal UserDetails currentUserDetails,
+                                         RedirectAttributes redirectAttributes) {
         if (currentUserDetails == null) {
             return "redirect:/login";
         }
 
         User currentUser = userService.findByUsername(currentUserDetails.getUsername());
-        User profileUser = userService.findByUsername(username); // Cambiado a profileUser para mayor claridad
+        User profileUser = userService.findByUsername(username);
 
-        if (profileUser == null) { // Si el usuario del perfil no existe
+        if (profileUser == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
             return "redirect:/home";
         }
 
         model.addAttribute("user", profileUser); // El usuario del perfil que se está viendo
-        
-        // Determinar si el perfil que se está viendo es el del usuario autenticado
+        model.addAttribute("currentUser", currentUser); // <--- ¡AÑADIR ESTA LÍNEA!
+
         boolean isCurrentUser = currentUser.getId().equals(profileUser.getId());
         model.addAttribute("isCurrentUser", isCurrentUser);
 
-        // Lógica para determinar el estado de amistad (solo si no es el usuario actual)
         FriendshipStatus status = null;
-        if (!isCurrentUser) { // Si no es el perfil del usuario actual
+        if (!isCurrentUser) {
             status = friendsService.getFriendshipStatus(currentUser, profileUser);
         }
         model.addAttribute("friendshipStatus", status);
         model.addAttribute("isFriend", status == FriendshipStatus.ACCEPTED);
 
-        // Lógica para diferenciar si la solicitud pendiente fue enviada o recibida (solo si no es el usuario actual)
         boolean sentPendingRequest = false;
         boolean receivedPendingRequest = false;
         if (!isCurrentUser && status == FriendshipStatus.PENDING) {
             Optional<Friends> friendship = friendsService.findFriendsBetween(currentUser, profileUser);
             if (friendship.isPresent()) {
                 if (friendship.get().getUser().getId().equals(currentUser.getId())) {
-                    sentPendingRequest = true; // El usuario actual es el 'user' (remitente) en la relación de amistad
+                    sentPendingRequest = true;
                 } else if (friendship.get().getFriend().getId().equals(currentUser.getId())) {
-                    receivedPendingRequest = true; // El usuario actual es el 'friend' (receptor) en la relación de amistad
+                    receivedPendingRequest = true;
                 }
             }
         }
         model.addAttribute("sentPendingRequest", sentPendingRequest);
         model.addAttribute("receivedPendingRequest", receivedPendingRequest);
 
-        // Lógica para mostrar posts y amigos basada en la privacidad
-        // Si el perfil es privado Y NO son amigos (o no es el propio usuario)
         boolean isPrivateAndNotFriend = profileUser.getIsPrivate() && !isCurrentUser && status != FriendshipStatus.ACCEPTED;
         model.addAttribute("isPrivateAndNotFriend", isPrivateAndNotFriend);
 
         List<Post> userPosts;
-        List<User> friendsList; // Declara la lista de amigos
+        List<User> friendsList;
 
         if (!isPrivateAndNotFriend) {
-            // Solo carga posts si no es un perfil privado y no somos amigos
-            userPosts = postService.getPostsByUser(profileUser);
-            // Carga la lista de amigos para el perfil que se está viendo
-            friendsList = friendsService.getAcceptedFriends(profileUser); // <-- ¡Obtener la lista de amigos aquí!
+            userPosts = postService.getPostsByUser(profileUser); // Asegúrate de que esto carga los comentarios asociados
+            friendsList = friendsService.getAcceptedFriends(profileUser);
         } else {
-            userPosts = Collections.emptyList(); // No mostrar posts si es privado y no son amigos
-            friendsList = Collections.emptyList(); // No mostrar amigos si es privado y no son amigos
+            userPosts = Collections.emptyList();
+            friendsList = Collections.emptyList();
         }
         model.addAttribute("userPosts", userPosts);
-        model.addAttribute("friendsList", friendsList); // <-- ¡Añade la lista de amigos al modelo!
+        model.addAttribute("friendsList", friendsList);
 
-        // Manejo de mensajes flash
         if (model.containsAttribute("successMessage")) {
             model.addAttribute("successMessage", model.getAttribute("successMessage"));
         }
@@ -128,8 +117,6 @@ public class ProfileController {
         return "profile";
     }
 
-    // --- Métodos para la GESTIÓN de AMISTAD ---
-
     @PostMapping("/friends/sendRequest")
     public String sendFriendRequest(@RequestParam("receiverId") Long receiverId,
                                     @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -137,7 +124,7 @@ public class ProfileController {
         try {
             User sender = userService.findByUsername(currentUserDetails.getUsername());
             User receiver = userService.findById(receiverId)
-                                       .orElseThrow(() -> new RuntimeException("Receptor no encontrado."));
+                                     .orElseThrow(() -> new RuntimeException("Receptor no encontrado."));
             friendsService.sendFriendRequest(sender, receiver);
             redirectAttributes.addFlashAttribute("successMessage", "Solicitud de amistad enviada.");
         } catch (RuntimeException e) {
@@ -157,7 +144,7 @@ public class ProfileController {
         try {
             User sender = userService.findByUsername(currentUserDetails.getUsername());
             User receiver = userService.findById(receiverId)
-                                       .orElseThrow(() -> new RuntimeException("Receptor no encontrado."));
+                                     .orElseThrow(() -> new RuntimeException("Receptor no encontrado."));
             friendsService.cancelFriendRequest(sender, receiver);
             redirectAttributes.addFlashAttribute("successMessage", "Solicitud de amistad cancelada.");
         } catch (RuntimeException e) {
@@ -178,7 +165,7 @@ public class ProfileController {
         try {
             User acceptor = userService.findByUsername(currentUserDetails.getUsername());
             User requester = userService.findById(requesterId)
-                                        .orElseThrow(() -> new RuntimeException("Solicitante no encontrado."));
+                                         .orElseThrow(() -> new RuntimeException("Solicitante no encontrado."));
             friendsService.acceptFriendRequest(acceptor, requester);
             redirectAttributes.addFlashAttribute("successMessage", "Solicitud de amistad aceptada. ¡Ahora sois amigos!");
         } catch (RuntimeException e) {
@@ -204,7 +191,7 @@ public class ProfileController {
         try {
             User decliner = userService.findByUsername(currentUserDetails.getUsername());
             User requester = userService.findById(requesterId)
-                                        .orElseThrow(() -> new RuntimeException("Solicitante no encontrado."));
+                                         .orElseThrow(() -> new RuntimeException("Solicitante no encontrado."));
             friendsService.declineFriendRequest(decliner, requester);
             redirectAttributes.addFlashAttribute("successMessage", "Solicitud de amistad rechazada.");
         } catch (RuntimeException e) {
