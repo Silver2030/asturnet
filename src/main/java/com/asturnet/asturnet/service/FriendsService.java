@@ -28,9 +28,6 @@ public interface FriendsService {
     // Obtener la lista de amigos de un usuario
     List<User> getFriends(User user);
 
-    // Obtener la relación de amistad directa o inversa entre dos usuarios
-    Optional<Friends> findFriendsBetween(User user1, User user2);
-
     // CANCEL FRIEND REQUEST: Añadido este método
     void cancelFriendRequest(User sender, User receiver);
 

@@ -538,7 +538,9 @@
         </div>
     </div> 
 
-    <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
+</div>
+
+<h3 style="text-align: center; margin-bottom: 20px; color: #333;">
         <span th:if="${isCurrentUser}">Mis Amigos</span> <span th:unless="${isCurrentUser}">Amigos de <span th:text="${user.username}"></span></span> </h3>
 
     <div th:if="${#lists.isEmpty(friendsList)}">
@@ -562,7 +564,6 @@
             </li>
         </ul>
     </div>
-</div>
 
 <div th:if="${isPrivateAndNotFriend}" class="private-profile-message">
     <p>Este perfil es privado. Solo los amigos pueden ver los detalles y publicaciones.</p>

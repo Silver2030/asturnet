@@ -1,13 +1,12 @@
 package com.asturnet.asturnet.controller;
 
-import com.asturnet.asturnet.model.User;
-import com.asturnet.asturnet.service.UserService; // Importa tu UserService
+import com.asturnet.asturnet.service.UserService; 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model; // Para añadir atributos al modelo de Thymeleaf
+import org.springframework.ui.Model; 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam; // Para obtener parámetros del formulario
-import org.springframework.web.servlet.mvc.support.RedirectAttributes; // Para mensajes flash en redirecciones
+import org.springframework.web.bind.annotation.RequestParam; 
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -19,20 +18,19 @@ public class AuthController {
         this.userService = userService;
     }
 
-    // --- Páginas de Login y Registro ---
-
+    // Endpoint para devolver la página de login
     @GetMapping("/login")
     public String showLoginPage() {
         return "login"; // Devuelve la plantilla login.html
     }
 
+    // Endpoint para devolver la página de registro
     @GetMapping("/register")
     public String showRegisterPage() {
         return "register"; // Devuelve la plantilla register.html
     }
 
-    // --- Manejo del Registro ---
-
+    // Endpoint para registrarse
     @PostMapping("/register")
     public String registerUser(@RequestParam String username,
                                @RequestParam String email,
@@ -50,10 +48,4 @@ public class AuthController {
             return "register";
         }
     }
-
-    // Spring Security maneja el POST de /login automáticamente por defecto.
-    // No necesitamos un @PostMapping("/login") explícito aquí a menos que quieras personalizarlo mucho.
-    // La configuración en SecurityConfig ya redirige a "/login" para la página de login.
-    // Para el POST de login, Spring Security espera que el formulario envíe 'username' y 'password'
-    // y los procesará automáticamente.
 }

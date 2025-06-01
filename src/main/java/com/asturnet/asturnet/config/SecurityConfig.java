@@ -2,8 +2,8 @@ package com.asturnet.asturnet.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider; // Importa DaoAuthenticationProvider
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // ¡NUEVO! Para habilitar @PreAuthorize
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider; 
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +14,7 @@ import com.asturnet.asturnet.service.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // ¡NUEVO! Habilita la seguridad a nivel de método para usar @PreAuthorize
+@EnableMethodSecurity 
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -28,7 +28,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Este bean ya lo tienes, ¡perfecto!
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

@@ -63,24 +63,25 @@ public class AdminController {
                            .orElse("redirect:/admin/reports");
     }
 
-    // --- SECCIÓN PARA REPORTES ---
-
-    @GetMapping("/reports") // Mapea a /admin/reports
+    // Endpoint para recuperar la lista de reportes
+    @GetMapping("/reports")
     public String listReports(Model model) {
         List<Report> reports = reportService.findAllReports();
         model.addAttribute("reports", reports);
-        return "admin/report-list"; // <--- CAMBIO AQUÍ: Ahora busca en templates/admin/report-list.html
+        return "admin/report-list"; 
     }
 
-    @GetMapping("/reports/{id}") // Mapea a /admin/reports/{id}
+    // Endpoint para recuperar un reporte
+    @GetMapping("/reports/{id}")
     public String viewReportDetails(@PathVariable Long id, Model model) {
         Report report = reportService.findReportById(id)
                                      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reporte no encontrado"));
         model.addAttribute("report", report);
-        return "admin/report-details"; // <--- CAMBIO AQUÍ: Ahora busca en templates/admin/report-details.html
+        return "admin/report-details"; 
     }
 
-    @PostMapping("/reports/{id}/update-status") // Mapea a /admin/reports/{id}/update-status
+    // Endpoint para actualizar el estado de un reporte
+    @PostMapping("/reports/{id}/update-status")
     public String updateReportStatus(@PathVariable Long id,
                                      @RequestParam("status") String status,
                                      @RequestParam(value = "adminNotes", required = false) String adminNotes,
@@ -95,7 +96,7 @@ public class AdminController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar el estado del reporte: " + e.getMessage());
         }
-        return "redirect:/admin/reports/" + id; // Redirección correcta a la URL del controlador
+        return "redirect:/admin/reports/" + id; 
     }
     
 }

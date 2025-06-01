@@ -2,7 +2,6 @@ package com.asturnet.asturnet.controller;
 
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
-import com.asturnet.asturnet.model.Like;
 import com.asturnet.asturnet.model.Comment;
 import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
@@ -17,17 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication; // Nuevo import
-import org.springframework.security.core.context.SecurityContextHolder; // Nuevo import
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // Nuevo import
-
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder; 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Controller
 public class PostController {
@@ -51,6 +43,7 @@ public class PostController {
                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
+    // Endpoint para la creación de posts
     @PostMapping("/posts/create")
     public String createPost(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("content") String content,
@@ -67,6 +60,7 @@ public class PostController {
         return "redirect:/home";
     }
 
+    // Endpoint para remover posts
     @PostMapping("/posts/delete")
     public String deletePost(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("postId") Long postId,
@@ -75,7 +69,6 @@ public class PostController {
             User user = userService.findByUsername(currentUser.getUsername());
             Post post = postService.getPostById(postId);
 
-            // --- Lógica de autorización mejorada ---
             // Si el usuario actual es el propietario del post O si es un ADMIN
             if (post.getUser().getId().equals(user.getId()) || isAdmin()) {
                 postService.deletePost(postId, user); // El segundo 'user' podría ser solo para log, la eliminación no debería depender del 'user' si es admin
@@ -83,7 +76,6 @@ public class PostController {
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para eliminar esta publicación.");
             }
-            // --- Fin de la lógica de autorización mejorada ---
 
         } catch (RuntimeException e) { // Podrías querer una excepción más específica aquí como PostNotFoundException
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar publicación: " + e.getMessage());

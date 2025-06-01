@@ -8,45 +8,68 @@
     <style>
         /* Puedes copiar los estilos generales de tu profile.html o home.html */
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
-        .header-bar {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        /* Añade el estilo para .site-branding aquí también para que se vea igual que en home */
-        .site-branding {
-            flex-grow: 1;
-            text-align: left;
-            margin-right: 20px;
-            min-width: 150px;
-        }
-        .header-bar h1 { margin: 0; font-size: 1.8em; }
-        .header-bar .user-actions { display: flex; gap: 15px; align-items: center; }
-        .header-bar .action-button {
-            background-color: #0056b3;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            font-size: 0.9em;
-        }
-        .header-bar .action-button:hover { background-color: #004085; }
-        .header-bar .logout-button {
-            background-color: #dc3545;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s ease;
-        }
-        .header-bar .logout-button:hover { background-color: #c82333; }
+        /* Estilos del header-bar */
+            .header-bar {
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .site-branding {
+                flex-grow: 1;
+                text-align: left;
+                margin-right: 20px;
+                min-width: 150px;
+            }
+
+            .header-bar h1 {
+                margin: 0;
+                font-size: 2.2em;
+                color: white;
+            }
+
+            .header-bar .user-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                align-items: center;
+                justify-content: flex-end;
+            }
+            /* Estilos de botones generales en el header */
+                .header-bar .action-button,
+                .header-bar .logout-button {
+                    padding: 8px 15px;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 0.9em;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background-color 0.3s ease;
+                }
+                .header-bar .action-button {
+                    background-color: #0056b3;
+                    color: white;
+                }
+                .header-bar .action-button:hover {
+                    background-color: #004085;
+                }
+                .header-bar .logout-button {
+                    background-color: #dc3545;
+                    color: white;
+                }
+                .header-bar .logout-button:hover {
+                    background-color: #c82333;
+                }
         .container { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .search-form { margin-bottom: 30px; }
         .search-form input[type="text"] {
