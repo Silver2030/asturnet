@@ -97,4 +97,5 @@ public class AdminController {
         }
         return "redirect:/admin/reports/" + id; // Redirección correcta a la URL del controlador
     }
+    
 }

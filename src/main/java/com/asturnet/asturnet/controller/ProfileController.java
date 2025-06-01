@@ -8,6 +8,7 @@ import com.asturnet.asturnet.service.FriendsService;
 import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -64,26 +65,35 @@ public class ProfileController {
         }
 
         model.addAttribute("user", profileUser); // El usuario del perfil que se está viendo
-        model.addAttribute("currentUser", currentUser); // <--- ¡AÑADIR ESTA LÍNEA!
+        model.addAttribute("currentUser", currentUser); // El usuario autenticado
 
         boolean isCurrentUser = currentUser.getId().equals(profileUser.getId());
         model.addAttribute("isCurrentUser", isCurrentUser);
 
+        // --- INICIO: Lógica para el rol de administrador ---
+        boolean isAdmin = currentUserDetails.getAuthorities().stream()
+                                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        // --- FIN: Lógica para el rol de administrador ---
+
         FriendshipStatus status = null;
-        if (!isCurrentUser) {
+        if (!isCurrentUser) { // Si no es el propio usuario, verificamos la amistad
             status = friendsService.getFriendshipStatus(currentUser, profileUser);
+        } else { // Si es el propio usuario, no hay un "estado de amistad" con uno mismo.
+            status = FriendshipStatus.ACCEPTED; // O un valor que indique que puede verlo todo
         }
         model.addAttribute("friendshipStatus", status);
-        model.addAttribute("isFriend", status == FriendshipStatus.ACCEPTED);
+        model.addAttribute("isFriend", status == FriendshipStatus.ACCEPTED); // 'isFriend' ya existe, la mantengo
 
         boolean sentPendingRequest = false;
         boolean receivedPendingRequest = false;
         if (!isCurrentUser && status == FriendshipStatus.PENDING) {
-            Optional<Friends> friendship = friendsService.findFriendsBetween(currentUser, profileUser);
+            Optional<com.asturnet.asturnet.model.Friends> friendship = friendsService.findFriendsBetween(currentUser, profileUser);
             if (friendship.isPresent()) {
-                if (friendship.get().getUser().getId().equals(currentUser.getId())) {
+                // Aquí deberías asegurarte de que tu entidad Friends tiene los campos correctos para determinar quién envió la solicitud
+                // Asumo que Friends tiene campos como 'sender' y 'receiver' o similar, o que el servicio maneja la dirección
+                if (friendship.get().getUser().getId().equals(currentUser.getId())) { // Suponiendo que 'getUser()' es el remitente
                     sentPendingRequest = true;
-                } else if (friendship.get().getFriend().getId().equals(currentUser.getId())) {
+                } else if (friendship.get().getFriend().getId().equals(currentUser.getId())) { // Suponiendo que 'getFriend()' es el receptor
                     receivedPendingRequest = true;
                 }
             }
@@ -91,14 +101,20 @@ public class ProfileController {
         model.addAttribute("sentPendingRequest", sentPendingRequest);
         model.addAttribute("receivedPendingRequest", receivedPendingRequest);
 
-        boolean isPrivateAndNotFriend = profileUser.getIsPrivate() && !isCurrentUser && status != FriendshipStatus.ACCEPTED;
+        // *** LA LÍNEA CLAVE QUE NECESITA EL CAMBIO ***
+        // Un perfil es privado y no visible si:
+        // 1. Es privado (profileUser.getIsPrivate())
+        // Y 2. NO es el usuario actual (!isCurrentUser)
+        // Y 3. NO son amigos (status != FriendshipStatus.ACCEPTED)
+        // Y 4. El usuario actual NO es un administrador (!isAdmin)
+        boolean isPrivateAndNotFriend = profileUser.getIsPrivate() && !isCurrentUser && status != FriendshipStatus.ACCEPTED && !isAdmin;
         model.addAttribute("isPrivateAndNotFriend", isPrivateAndNotFriend);
 
         List<Post> userPosts;
         List<User> friendsList;
 
-        if (!isPrivateAndNotFriend) {
-            userPosts = postService.getPostsByUser(profileUser); // Asegúrate de que esto carga los comentarios asociados
+        if (!isPrivateAndNotFriend) { // Si no está bloqueado por privacidad (incluye admins)
+            userPosts = postService.getPostsByUser(profileUser);
             friendsList = friendsService.getAcceptedFriends(profileUser);
         } else {
             userPosts = Collections.emptyList();
@@ -107,14 +123,15 @@ public class ProfileController {
         model.addAttribute("userPosts", userPosts);
         model.addAttribute("friendsList", friendsList);
 
-        if (model.containsAttribute("successMessage")) {
-            model.addAttribute("successMessage", model.getAttribute("successMessage"));
+        // Flash attributes (para mensajes de redirección)
+        if (redirectAttributes.getFlashAttributes().containsKey("successMessage")) {
+            model.addAttribute("successMessage", redirectAttributes.getFlashAttributes().get("successMessage"));
         }
-        if (model.containsAttribute("errorMessage")) {
-            model.addAttribute("errorMessage", model.getAttribute("errorMessage"));
+        if (redirectAttributes.getFlashAttributes().containsKey("errorMessage")) {
+            model.addAttribute("errorMessage", redirectAttributes.getFlashAttributes().get("errorMessage"));
         }
 
-        return "profile";
+        return "profile"; // Asumo que tu plantilla se llama 'profile.html' o 'view-profile.html'
     }
 
     @PostMapping("/friends/sendRequest")

@@ -9,7 +9,9 @@ import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication; // Necesario para SecurityContextHolder
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder; // Necesario para SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority; // Necesario para ROLE_ADMIN
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,15 +51,13 @@ public class HomeController {
     }
 
     @GetMapping("/home")
-    public String home(Model model, Principal principal) {
+    public String home(Model model, Principal principal, @AuthenticationPrincipal UserDetails currentUserDetails) { // Añade UserDetails aquí
         List<Post> postsToShow = new ArrayList<>();
         Map<Long, Boolean> userLikesPost = new HashMap<>();
         Map<Long, Long> postLikesCount = new HashMap<>();
         Long currentUserId = null;
         User currentUser = null;
-
-        // Añadir isAdmin al modelo de forma temprana
-        model.addAttribute("isAdmin", isAdmin()); // <--- ¡Añadido aquí!
+        boolean isAdmin = false; // Declarar aquí
 
         if (principal != null) {
             String currentUsername = principal.getName();
@@ -68,15 +68,26 @@ public class HomeController {
                 model.addAttribute("username", currentUser.getUsername());
                 model.addAttribute("currentUser", currentUser);
 
-                // Aplicar filtro de posts
-                postsToShow = postService.getHomeFeedPosts(currentUser);
+                // Determinar si es administrador
+                isAdmin = currentUserDetails.getAuthorities().stream() // Usamos currentUserDetails para esto
+                                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                model.addAttribute("isAdmin", isAdmin); // Esto ya lo tenías, pero ahora con el cálculo correcto
+
+                // Aplicar filtro de posts, PASANDO EL ESTADO DE ADMIN AL SERVICIO
+                // OPCION 1: Pasar isAdmin directamente (si la firma del servicio lo permite)
+                // postsToShow = postService.getHomeFeedPosts(currentUser, isAdmin); // Necesitarías modificar la firma del servicio
+
+                // OPCION 2 (preferida): Que el servicio calcule si el usuario es admin internamente
+                postsToShow = postService.getHomeFeedPosts(currentUser); // Mantenemos la firma actual
             } else {
                 System.out.println("Current User not found in DB for principal: " + currentUsername);
                 model.addAttribute("username", "Invitado");
+                model.addAttribute("isAdmin", false); // Asegurarse de que esté definida
             }
         } else {
             System.out.println("User not authenticated. Showing empty feed.");
             model.addAttribute("username", "Invitado");
+            model.addAttribute("isAdmin", false); // Asegurarse de que esté definida
             // Asegurarse de que todas las variables del modelo existan para evitar errores en Thymeleaf
             model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("userLikesPost", new HashMap<>());
@@ -142,4 +153,6 @@ public class HomeController {
         model.addAttribute("searchResults", searchResults);
         return "search-results";
     }
+
+    
 }

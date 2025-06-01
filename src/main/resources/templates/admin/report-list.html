@@ -161,7 +161,9 @@
                         <span th:unless="${report.reportedUser != null}">N/A</span>
                     </td>
                     <td>
-                        <span th:if="${report.reportedPost != null}" th:text="${report.reportedPost.id}"></span>
+                        <span th:if="${report.reportedPost != null}">
+                            <a th:href="@{/posts/{id}(id=${report.reportedPost.id})}" th:text="${report.reportedPost.id}"></a>
+                        </span>
                         <span th:unless="${report.reportedPost != null}">N/A</span>
                     </td>
                     <td th:text="${report.reason}">Razón del reporte</td>
