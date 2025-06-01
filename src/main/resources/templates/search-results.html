@@ -96,14 +96,17 @@
     </style>
 </head>
 <body>
-    <div class="header-bar">
-        <div class="site-branding"> <h1>AsturNet</h1>
+    <div class="header-bar" th:fragment="navbar"> <div class="site-branding">
+            <h1>AsturNet</h1>
         </div>
         <div class="user-actions">
             <a th:href="@{/home}" class="action-button">Inicio</a>
             <a th:href="@{/profile}" class="action-button">Mi Perfil</a>
             <a th:href="@{/search}" class="action-button">Buscar Usuarios</a>
             <a th:href="@{/friend-requests}" class="action-button">Solicitudes Recibidas</a>
+
+            <a th:href="@{/admin/reports}" class="action-button" sec:authorize="hasRole('ADMIN')">Administrar Reportes</a>
+
             <form th:action="@{/logout}" method="post" style="display: inline-block;">
                 <button type="submit" class="logout-button">Cerrar Sesión</button>
             </form>
