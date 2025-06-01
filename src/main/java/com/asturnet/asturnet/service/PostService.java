@@ -3,7 +3,6 @@ package com.asturnet.asturnet.service;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import java.util.List;
-import java.util.Optional;
 
 public interface PostService {
     Post createPost(User user, String content, String imageUrl, String videoUrl);
@@ -14,6 +13,5 @@ public interface PostService {
 
     List<Post> getAllPostsWithUserAndComments();
 
-    // Método que necesitamos implementar para el feed filtrado
     List<Post> getHomeFeedPosts(User currentUser);
 }

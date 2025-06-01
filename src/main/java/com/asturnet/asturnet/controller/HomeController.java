@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -42,14 +41,13 @@ public class HomeController {
     }
 
     // Método auxiliar para verificar si el usuario actual es admin
-    // Este método ya lo tienes en PostController, pero lo duplicamos aquí para la lógica de visualización
-    // (o podrías tener un servicio de utilidad de seguridad si se usa mucho)
     private boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated() &&
                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
+    // Endpoint para devolver la entrada de la página
     @GetMapping("/home")
     public String home(Model model, Principal principal, @AuthenticationPrincipal UserDetails currentUserDetails) { // Añade UserDetails aquí
         List<Post> postsToShow = new ArrayList<>();
@@ -57,7 +55,7 @@ public class HomeController {
         Map<Long, Long> postLikesCount = new HashMap<>();
         Long currentUserId = null;
         User currentUser = null;
-        boolean isAdmin = false; // Declarar aquí
+        boolean isAdmin = false; 
 
         if (principal != null) {
             String currentUsername = principal.getName();
@@ -71,24 +69,19 @@ public class HomeController {
                 // Determinar si es administrador
                 isAdmin = currentUserDetails.getAuthorities().stream() // Usamos currentUserDetails para esto
                                             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-                model.addAttribute("isAdmin", isAdmin); // Esto ya lo tenías, pero ahora con el cálculo correcto
-
-                // Aplicar filtro de posts, PASANDO EL ESTADO DE ADMIN AL SERVICIO
-                // OPCION 1: Pasar isAdmin directamente (si la firma del servicio lo permite)
-                // postsToShow = postService.getHomeFeedPosts(currentUser, isAdmin); // Necesitarías modificar la firma del servicio
-
-                // OPCION 2 (preferida): Que el servicio calcule si el usuario es admin internamente
+                model.addAttribute("isAdmin", isAdmin); 
+                
                 postsToShow = postService.getHomeFeedPosts(currentUser); // Mantenemos la firma actual
             } else {
                 System.out.println("Current User not found in DB for principal: " + currentUsername);
                 model.addAttribute("username", "Invitado");
-                model.addAttribute("isAdmin", false); // Asegurarse de que esté definida
+                model.addAttribute("isAdmin", false); 
             }
         } else {
             System.out.println("User not authenticated. Showing empty feed.");
             model.addAttribute("username", "Invitado");
-            model.addAttribute("isAdmin", false); // Asegurarse de que esté definida
-            // Asegurarse de que todas las variables del modelo existan para evitar errores en Thymeleaf
+            model.addAttribute("isAdmin", false); 
+
             model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("userLikesPost", new HashMap<>());
             model.addAttribute("postLikesCount", new HashMap<>());
@@ -113,11 +106,11 @@ public class HomeController {
         return "home";
     }
 
+    // Endpoint para devolver la lista de busqueda de usuarios
     @GetMapping("/search")
     public String searchUsers(@RequestParam(value = "query", required = false) String query, Model model, Principal principal) {
-        List<User> searchResults = new ArrayList<>(); // Inicializar para evitar null
+        List<User> searchResults = new ArrayList<>(); 
         
-        // Asegúrate de pasar isAdmin al modelo de búsqueda también si el HTML de búsqueda usa encabezados o pie de página comunes
         model.addAttribute("isAdmin", isAdmin()); 
 
         if (query != null && !query.trim().isEmpty()) {
@@ -125,8 +118,6 @@ public class HomeController {
             model.addAttribute("query", query);
         }
 
-        // Obtener el principal directamente como argumento
-        // Principal principal ya está disponible aquí por el parámetro del método
         if (principal != null) {
             String currentUsername = principal.getName();
             User currentUser = userService.findByUsername(currentUsername);
@@ -141,10 +132,9 @@ public class HomeController {
                 model.addAttribute("friendshipStatuses", friendshipStatuses);
                 model.addAttribute("currentUserId", currentUser.getId());
             }
-            model.addAttribute("currentUser", currentUser); // <--- Pasar currentUser al modelo de búsqueda
+            model.addAttribute("currentUser", currentUser); 
         } else {
-            // Si no hay principal, el usuario no está autenticado. 
-            // Asegúrate de que las variables del modelo necesarias en Thymeleaf existan.
+
             model.addAttribute("currentUser", null); // Para evitar NullPointer en Thymeleaf
             model.addAttribute("currentUserId", null);
             model.addAttribute("friendshipStatuses", new HashMap<>());

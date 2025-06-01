@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     
     <style>
-        /* Tus estilos CSS del antiguo view-profile.html aquí */
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
         .header-bar {
             background-color: #007bff;
@@ -19,7 +18,7 @@
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        /* Añade el estilo para .site-branding aquí también para que se vea igual que en home */
+
         .site-branding {
             flex-grow: 1;
             text-align: left;
@@ -28,8 +27,8 @@
         }
         .header-bar h1 {
             margin: 0;
-            font-size: 2.2em; /* Modificado para coincidir con el header de home */
-            color: white; /* Asegurarse de que el color sea blanco */
+            font-size: 2.2em; 
+            color: white; 
         }
         .header-bar .user-actions {
             display: flex;
@@ -62,7 +61,7 @@
             background-color: #c82333;
         }
 
-        /* Media query para header-bar */
+
         @media (max-width: 768px) {
             .header-bar {
                 flex-direction: column;
@@ -103,20 +102,20 @@
         .action-buttons a:hover, .action-buttons button:hover { background-color: #0056b3; }
         .private-badge { background-color: #ffc107; color: #333; padding: 5px 10px; border-radius: 15px; font-size: 0.9em; font-weight: bold; margin-left: 10px; }
 
-        /* Estilos adicionales para amistad y posts */
+
         .friendship-actions { margin-top: 20px; }
         .friendship-actions form { display: inline-block; margin: 0 5px; }
-        /* Reutiliza .action-button para los botones de amistad o crea específicos si necesitas otro estilo */
-        .action-button.add-friend-button { background-color: #28a745; } /* Verde para añadir */
+
+        .action-button.add-friend-button { background-color: #28a745; } 
         .action-button.add-friend-button:hover { background-color: #218838; }
 
-        .action-button.cancel-request-button { background-color: #ffc107; color: #333; } /* Amarillo para cancelar */
+        .action-button.cancel-request-button { background-color: #ffc107; color: #333; } 
         .action-button.cancel-request-button:hover { background-color: #e0a800; }
 
-        .action-button.accept-request-button { background-color: #28a745; } /* Verde para aceptar */
+        .action-button.accept-request-button { background-color: #28a745; } 
         .action-button.accept-button:hover { background-color: #218838; }
 
-        .action-button.decline-request-button, .action-button.remove-friend-button { background-color: #dc3545; } /* Rojo para rechazar/eliminar */
+        .action-button.decline-request-button, .action-button.remove-friend-button { background-color: #dc3545; } 
         .action-button.decline-request-button:hover, .action-button.remove-friend-button:hover { background-color: #c82333; }
 
         .user-posts-section { margin-top: 40px; text-align: left; }
@@ -133,11 +132,9 @@
         .success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* NUEVOS ESTILOS AÑADIDOS, SIGUIENDO TUS PATRONES */
-        /* Para el badge de usuario baneado, similar a private-badge */
         .banned-badge {
-            background-color: #dc3545; /* Rojo para indicar baneo */
-            color: white; /* Texto blanco para contraste */
+            background-color: #dc3545; 
+            color: white; 
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 0.9em;
@@ -145,148 +142,144 @@
             margin-left: 10px;
         }
 
-        /* Para los botones de ban/unban, reutilizando .action-button y definiendo colores específicos */
         .action-button.ban-button {
-            background-color: #dc3545; /* Rojo para banear */
+            background-color: #dc3545; 
         }
         .action-button.ban-button:hover {
             background-color: #c82333;
         }
         .action-button.unban-button {
-            background-color: #28a745; /* Verde para desbanear */
+            background-color: #28a745; 
         }
         .action-button.unban-button:hover {
             background-color: #218838;
         }
 
-        /* Estilos para el contenedor de comentarios */
-.comments-section {
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-}
+        .comments-section {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
 
-.comments-section h4 {
-    font-size: 1.1em;
-    color: #555;
-    margin-bottom: 15px;
-}
+        .comments-section h4 {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 15px;
+        }
 
-/* Estilos para cada comentario individual */
-.comment {
-    background-color: #f9f9f9; /* Fondo claro para cada comentario */
-    border: 1px solid #e0e0e0; /* Borde sutil */
-    border-radius: 5px;
-    padding: 10px 15px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03); /* Sombra suave */
-    display: flex; /* Para controlar la disposición de los elementos internos */
-    flex-direction: column; /* Apila el header y el contenido */
-}
+        .comment {
+            background-color: #f9f9f9; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03); 
+            display: flex; 
+            flex-direction: column; 
+        }
 
-.comment-header {
-    display: flex; /* Para alinear la foto, nombre y @username */
-    align-items: center;
-    margin-bottom: 5px;
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-}
+        .comment-header {
+            display: flex; 
+            align-items: center;
+            margin-bottom: 5px;
+            flex-wrap: wrap; 
+        }
 
-.comment-header .profile-picture-small {
-    width: 30px; /* Tamaño de foto de perfil en comentarios */
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 8px;
-}
+        .comment-header .profile-picture-small {
+            width: 30px; 
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+        }
 
-.comment-header strong a {
-    color: #007bff; /* Color del enlace del nombre de usuario */
-    text-decoration: none;
-    font-size: 0.95em;
-    margin-right: 5px; /* Espacio después del nombre */
-}
+        .comment-header strong a {
+            color: #007bff; 
+            text-decoration: none;
+            font-size: 0.95em;
+            margin-right: 5px; 
+        }
 
-.comment-header strong a:hover {
-    text-decoration: underline;
-}
+        .comment-header strong a:hover {
+            text-decoration: underline;
+        }
 
-.comment-header span { /* Para el @username */
-    color: #666;
-    font-size: 0.85em;
-    margin-right: 10px; /* Espacio antes de la fecha */
-}
+        .comment-header span { 
+            color: #666;
+            font-size: 0.85em;
+            margin-right: 10px; 
+        }
 
-.comment-meta { /* Para la fecha/hora del comentario */
-    font-size: 0.75em;
-    color: #999;
-    margin-left: auto; /* Empuja la fecha a la derecha si hay espacio */
-    white-space: nowrap; /* Evita que la fecha se rompa en varias líneas */
-}
+        .comment-meta { 
+            font-size: 0.75em;
+            color: #999;
+            margin-left: auto;
+            white-space: nowrap; 
+        }
 
-.comment-content {
-    margin: 5px 0 10px 0;
-    line-height: 1.4;
-    color: #444;
-}
+        .comment-content {
+            margin: 5px 0 10px 0;
+            line-height: 1.4;
+            color: #444;
+        }
 
-.comment-actions {
-    text-align: right;
-    margin-top: 5px; /* Espacio entre el contenido y los botones */
-}
+        .comment-actions {
+            text-align: right;
+            margin-top: 5px; 
+        }
 
-.comment-actions .delete-button {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.75em;
-    transition: background-color 0.2s ease;
-}
+        .comment-actions .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+            transition: background-color 0.2s ease;
+        }
 
-.comment-actions .delete-button:hover {
-    background-color: #c82333;
-}
+        .comment-actions .delete-button:hover {
+            background-color: #c82333;
+        }
 
-/* Estilos para el formulario de comentarios */
-.add-comment-section {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-}
+        .add-comment-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
 
-.comment-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-.comment-form textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    resize: vertical;
-    min-height: 60px;
-    box-sizing: border-box;
-}
+        .comment-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
 
-.comment-form button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    align-self: flex-end;
-}
+        .comment-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            align-self: flex-end;
+        }
 
-.comment-form button:hover {
-    background-color: #0056b3;
-}
+        .comment-form button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>

@@ -6,7 +6,6 @@
     <title>Solicitudes de Amistad - XenteAstur</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
-        /* Puedes reutilizar tus estilos generales aquí, o enlazar tu CSS común */
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
         .header-bar {
             background-color: #007bff;
@@ -43,7 +42,6 @@
             font-size: 0.9em;
             transition: background-color 0.3s ease;
         }
-        /* Añade el estilo para .site-branding aquí también para que se vea igual que en home */
         .site-branding {
             flex-grow: 1;
             text-align: left;
@@ -61,7 +59,7 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Para separar el nombre de los botones */
+            justify-content: space-between;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .request-item img {
@@ -81,10 +79,9 @@
         .request-info a:hover { text-decoration: underline; }
         .request-info span { margin-left: 5px; color: #666; font-size: 0.9em; }
 
-        /* Reutiliza tus botones de acción de ProfileController */
-        .action-button.accept-request-button { background-color: #28a745; } /* Verde para aceptar */
+        .action-button.accept-request-button { background-color: #28a745; } 
         .action-button.accept-request-button:hover { background-color: #218838; }
-        .action-button.decline-request-button { background-color: #dc3545; } /* Rojo para rechazar */
+        .action-button.decline-request-button { background-color: #dc3545; } 
         .action-button.decline-request-button:hover { background-color: #c82333; }
 
         .request-actions form { display: inline-block; margin-left: 10px; }

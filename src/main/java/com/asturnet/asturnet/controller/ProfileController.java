@@ -1,14 +1,12 @@
 package com.asturnet.asturnet.controller;
 
-import com.asturnet.asturnet.model.Friends;
-import com.asturnet.asturnet.model.FriendshipStatus; // Importa el enum FriendshipStatus
+import com.asturnet.asturnet.model.FriendshipStatus;
 import com.asturnet.asturnet.model.Post;
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.service.FriendsService;
 import com.asturnet.asturnet.service.PostService;
 import com.asturnet.asturnet.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Collections;
@@ -36,6 +33,7 @@ public class ProfileController {
         this.postService = postService;
     }
 
+    // Endpoint para obtener el perfil propio
     @GetMapping("/profile")
     public String viewMyProfile(@AuthenticationPrincipal UserDetails currentUserDetails) {
         if (currentUserDetails == null) {
@@ -48,6 +46,7 @@ public class ProfileController {
         return "redirect:/profile/" + currentUser.getUsername();
     }
 
+    // Endpoint para obtener un perfil ajeno
    @GetMapping("/profile/{username}")
     public String viewOtherUserProfile(@PathVariable String username, Model model,
                                        @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -79,16 +78,10 @@ public class ProfileController {
         if (!isCurrentUser) { // Si NO es el propio usuario, obtenemos el estado de amistad real
             status = friendsService.getFriendshipStatus(currentUser, profileUser);
         } else {
-            // Si ES el propio usuario, FriendshipStatus.ACCEPTED es confuso para los botones de amistad.
-            // Los botones de amistad solo se muestran si !isCurrentUser.
-            // Para la visibilidad de posts (isPrivateAndNotFriend), se maneja el isCurrentUser,
-            // por lo que no es necesario forzar ACCEPTED aquí.
-            // Podemos dejarlo como null o un estado que no active los casos de amistad.
-            status = null; // O FriendshipStatus.NOT_FRIENDS si prefieres un valor por defecto explícito
+            status = null; 
         }
         model.addAttribute("friendshipStatus", status);
-        // La variable 'isFriend' ya está implícita con friendshipStatus == FriendshipStatus.ACCEPTED
-        // y se usa en la lógica de privacidad, así que la mantenemos para consistencia.
+
         model.addAttribute("isFriend", status == FriendshipStatus.ACCEPTED); 
 
         boolean sentPendingRequest = false;
@@ -99,10 +92,8 @@ public class ProfileController {
             // Usamos el método unidireccional para saber quién envió la solicitud PENDING
             Optional<com.asturnet.asturnet.model.Friends> friendship = friendsService.findByUserAndFriend(currentUser, profileUser);
             if (friendship.isPresent() && friendship.get().getStatus() == FriendshipStatus.PENDING) {
-                // Si 'currentUser' es el 'user' de la relación PENDING, entonces él la envió
                 sentPendingRequest = true;
             } else {
-                // Si 'profileUser' es el 'user' de la relación PENDING (y currentUser es el 'friend'), entonces la recibió
                 Optional<com.asturnet.asturnet.model.Friends> reverseFriendship = friendsService.findByUserAndFriend(profileUser, currentUser);
                 if (reverseFriendship.isPresent() && reverseFriendship.get().getStatus() == FriendshipStatus.PENDING) {
                     receivedPendingRequest = true;
@@ -129,17 +120,17 @@ public class ProfileController {
         model.addAttribute("userPosts", userPosts);
         model.addAttribute("friendsList", friendsList);
 
-        // Flash attributes (para mensajes de redirección)
-        if (model.asMap().containsKey("successMessage")) { // Usar model.asMap().containsKey para flash attributes
+        if (model.asMap().containsKey("successMessage")) { 
             model.addAttribute("successMessage", model.asMap().get("successMessage"));
         }
-        if (model.asMap().containsKey("errorMessage")) { // Usar model.asMap().containsKey para flash attributes
+        if (model.asMap().containsKey("errorMessage")) {
             model.addAttribute("errorMessage", model.asMap().get("errorMessage"));
         }
 
-        return "profile"; // Asumo que tu plantilla se llama 'profile.html'
+        return "profile"; 
     }
 
+    // Endpoint para enviar solicitudes de amistad
     @PostMapping("/friends/sendRequest")
     public String sendFriendRequest(@RequestParam("receiverId") Long receiverId,
                                     @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -160,6 +151,7 @@ public class ProfileController {
         return "redirect:/home";
     }
 
+    // Endpoint para cancelar solicitudes de amistad
     @PostMapping("/friends/cancelRequest")
     public String cancelFriendRequest(@RequestParam("receiverId") Long receiverId,
                                       @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -180,6 +172,7 @@ public class ProfileController {
         return "redirect:/home";
     }
 
+    // Endpoint para aceptar solicitudes de amistad
     @PostMapping("/friends/acceptRequest")
     public String acceptFriendRequest(@RequestParam("requesterId") Long requesterId,
                                       @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -206,6 +199,7 @@ public class ProfileController {
         }
     }
 
+    // Endpoint para rechazar solicitudes de amistad
     @PostMapping("/friends/declineRequest")
     public String declineFriendRequest(@RequestParam("requesterId") Long requesterId,
                                        @AuthenticationPrincipal UserDetails currentUserDetails,
@@ -232,6 +226,7 @@ public class ProfileController {
         }
     }
 
+    // Endpoint para remover amigos
     @PostMapping("/friends/removeFriend")
     public String removeFriend(@RequestParam("friendId") Long friendId,
                                @AuthenticationPrincipal UserDetails currentUserDetails,

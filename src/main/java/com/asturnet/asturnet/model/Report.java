@@ -23,11 +23,11 @@ public class Report {
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
 
-    @ManyToOne(fetch = FetchType.EAGER) // <--- ¡CAMBIO AQUÍ!
+    @ManyToOne(fetch = FetchType.EAGER) 
     @JoinColumn(name = "reported_user_id")
     private User reportedUser;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Puedes dejar este en LAZY si no siempre necesitas el Post
+    @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "reported_post_id")
     private Post reportedPost;
 

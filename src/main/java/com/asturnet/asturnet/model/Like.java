@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "likes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "post_id"}) // Asegura que un usuario solo pueda dar un like por post
+    @UniqueConstraint(columnNames = {"user_id", "post_id"}) 
 })
 @Data
 @NoArgsConstructor
@@ -23,11 +23,11 @@ public class Like {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; // El usuario que dio el like
+    private User user; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    private Post post; // La publicación que recibió el like
+    private Post post; 
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

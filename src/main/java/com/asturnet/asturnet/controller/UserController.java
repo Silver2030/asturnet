@@ -21,18 +21,17 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Muestra el formulario de edición de perfil
+    // Endpoint para obtener la edicion el perfil
     @GetMapping("/profile/edit")
     public String showEditProfilePage(@AuthenticationPrincipal UserDetails currentUserDetails, Model model) {
         User user = userService.findByUsername(currentUserDetails.getUsername());
         model.addAttribute("user", user);
 
-        // *** CORRECCIÓN AQUÍ: Usar constructor por defecto y setters ***
         UserProfileUpdateRequest profileUpdateRequest = new UserProfileUpdateRequest();
         profileUpdateRequest.setFullName(user.getFullName());
         profileUpdateRequest.setBio(user.getBio());
         profileUpdateRequest.setProfilePictureUrl(user.getProfilePictureUrl());
-        profileUpdateRequest.setIsPrivate(user.getIsPrivate()); // Asegúrate de que User tiene getIsPrivate()
+        profileUpdateRequest.setIsPrivate(user.getIsPrivate()); 
 
         model.addAttribute("profileUpdateRequest", profileUpdateRequest);
 
@@ -46,7 +45,7 @@ public class UserController {
         return "edit-profile";
     }
 
-    // Procesa el formulario de edición de perfil
+    // Endpoint para editar el perfil
     @PostMapping("/profile/edit")
     public String updateProfile(@AuthenticationPrincipal UserDetails currentUserDetails,
                                 @ModelAttribute UserProfileUpdateRequest request,

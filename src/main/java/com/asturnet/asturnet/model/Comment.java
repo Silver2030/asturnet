@@ -20,17 +20,17 @@ public class Comment {
     private Long id;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String content; // El texto del comentario
+    private String content; 
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación Muchos a Uno con User
-    @JoinColumn(name = "user_id", nullable = false) // Columna en la tabla 'comments' para el ID del usuario
-    private User user; // El usuario que hizo el comentario
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "user_id", nullable = false) 
+    private User user; 
 
-    @ManyToOne(fetch = FetchType.LAZY) // Relación Muchos a Uno con Post
-    @JoinColumn(name = "post_id", nullable = false) // Columna en la tabla 'comments' para el ID del post
-    private Post post; // La publicación a la que pertenece el comentario
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "post_id", nullable = false) 
+    private Post post; 
 
-    @CreationTimestamp // Fecha de creación automática
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 }

@@ -10,19 +10,15 @@ import com.asturnet.asturnet.repository.FriendsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// IMPORTS NECESARIOS PARA VERIFICAR ROL DE ADMIN
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // Correcto
+import org.springframework.security.core.authority.SimpleGrantedAuthority; 
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections; // Añadir esta importación si no está
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -37,8 +33,6 @@ public class PostServiceImpl implements PostService {
         this.friendsRepository = friendsRepository;
     }
 
-    // Método auxiliar para verificar si el usuario actual es admin
-    // Este método está perfecto y lo usaremos.
     private boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated() &&
@@ -83,8 +77,6 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Publicación no encontrada con ID: " + postId));
 
-        // --- Lógica de autorización mejorada en el servicio ---
-        // El usuario puede eliminar si es el propietario del post O si es un ADMIN
         if (post.getUser().getId().equals(currentUser.getId()) || isAdmin()) {
             postRepository.delete(post);
         } else {
@@ -101,21 +93,12 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public List<Post> getHomeFeedPosts(User currentUser) {
-        // *** PASO CRÍTICO: Si el usuario es administrador, devuelve TODOS los posts ***
-        if (isAdmin()) { // Usamos el método auxiliar isAdmin()
-            return postRepository.findByOrderByCreatedAtDesc(); // Este método debe traer todos los posts.
+        if (isAdmin()) { 
+            return postRepository.findByOrderByCreatedAtDesc(); 
         }
 
-        // Lógica para usuarios normales (no administradores y autenticados)
-        // Obtener IDs de amigos
         Set<Long> friendIds = new HashSet<>();
-        friendIds.add(currentUser.getId()); // Incluir al propio usuario para ver sus posts
-
-        // Obtener amigos del usuario actual
-        // El código de abajo es un poco redundante si FriendshipService ya tiene getAcceptedFriends
-        // Deberías usar: List<User> friends = friendshipService.getAcceptedFriends(currentUser.getId());
-        // Y luego extraer los IDs.
-        // Pero adaptaremos tu lógica existente.
+        friendIds.add(currentUser.getId()); 
 
         List<Friends> friendshipsWhereUserIsSender = friendsRepository.findByUserAndStatus(currentUser, FriendshipStatus.ACCEPTED);
         for (Friends friends : friendshipsWhereUserIsSender) {
@@ -127,15 +110,11 @@ public class PostServiceImpl implements PostService {
             friendIds.add(friends.getUser().getId());
         }
 
-        // Recuperar los objetos User de los amigos
         List<User> friendAuthors = new ArrayList<>();
         if (!friendIds.isEmpty()) {
             friendAuthors = userRepository.findAllById(friendIds);
         }
 
-        // Llamar al repositorio con la lógica de filtrado combinada
-        // Esto asume que findHomeFeedPosts en el repositorio puede manejar la lógica
-        // de "posts de amigos O posts públicos".
         return postRepository.findHomeFeedPosts(currentUser, friendAuthors);
     }
 }

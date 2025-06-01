@@ -41,7 +41,7 @@ public class ReportServiceImpl implements ReportService {
         report.setReason(reason);
         report.setStatus(ReportStatus.PENDING);
         report.setCreatedAt(LocalDateTime.now());
-        report.setReportedPost(null); // Explícitamente null para reportes de usuario
+        report.setReportedPost(null); 
         return reportRepository.save(report);
     }
 
@@ -60,15 +60,10 @@ public class ReportServiceImpl implements ReportService {
         report.setStatus(ReportStatus.PENDING);
         report.setCreatedAt(LocalDateTime.now());
 
-        // AQUI ESTÁ LA LÍNEA QUE FALTABA PARA ASIGNAR EL USUARIO REPORTADO EN UN REPORTE DE POST
         if (reportedPost.getUser() != null) {
-            report.setReportedUser(reportedPost.getUser()); // ¡Asigna el creador del post como el usuario reportado!
+            report.setReportedUser(reportedPost.getUser()); 
         } else {
-            // Esto es una advertencia, pero dado que user_id es nullable=false en Post.java,
-            // esta situación no debería ocurrir si los posts se guardan correctamente.
             System.err.println("Advertencia: El post con ID " + reportedPostId + " no tiene un usuario asociado para reportar.");
-            // Si quieres que el reporte falle si no hay autor, puedes lanzar una excepción aquí.
-            // throw new RuntimeException("No se puede reportar un post sin autor.");
         }
 
         return reportRepository.save(report);

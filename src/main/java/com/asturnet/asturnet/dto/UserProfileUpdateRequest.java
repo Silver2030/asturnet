@@ -1,7 +1,6 @@
 package com.asturnet.asturnet.dto;
 
 import lombok.Data;
-import com.asturnet.asturnet.model.PrivacyLevel; // Importa tu Enum PrivacyLevel
 
 @Data // Genera getters y setters
 public class UserProfileUpdateRequest {

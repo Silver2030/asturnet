@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     
 <style>
-    /* Estilos generales del body */
     body {
         font-family: Arial, sans-serif;
         background-color: #f4f7f6;
@@ -17,7 +16,6 @@
         color: #333;
     }
 
-    /* Estilos del header-bar */
     .header-bar {
         background-color: #007bff;
         color: white;
@@ -52,7 +50,6 @@
         justify-content: flex-end;
     }
 
-    /* Estilos de botones generales en el header */
     .header-bar .action-button,
     .header-bar .logout-button {
         padding: 8px 15px;
@@ -81,7 +78,6 @@
         background-color: #c82333;
     }
 
-    /* Media query para pantallas pequeñas (ej. móviles) */
     @media (max-width: 768px) {
         .header-bar {
             flex-direction: column;
@@ -108,8 +104,6 @@
         }
     }
 
-
-    /* --- Contenedor Principal --- */
     .container {
         max-width: 800px;
         margin: 30px auto;
@@ -119,7 +113,6 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    /* --- Mensajes (Éxito/Error) --- */
     .message {
         padding: 12px;
         margin-bottom: 20px;
@@ -138,22 +131,17 @@
         border: 1px solid #f5c6cb;
     }
 
-    /* --- Títulos y Párrafos de Bienvenida --- */
-    /* Asegúrate de que estos h2 y p que están justo después de los mensajes
-       también estén centrados si es lo que quieres */
-    h2, .container > p { /* Selector más específico para evitar afectar otros p */
+    h2, .container > p { 
         text-align: center;
         margin-bottom: 15px;
     }
-    .container h3 { /* Para "Crear nueva publicación" y "Publicaciones recientes" */
+    .container h3 { 
         margin-top: 25px;
         margin-bottom: 15px;
         color: #555;
         text-align: center;
     }
 
-
-    /* --- Formulario de Publicación (Post Form) --- */
     .post-form {
         background-color: #f9f9f9;
         padding: 20px;
@@ -163,20 +151,20 @@
     }
     .post-form textarea,
     .post-form input[type="text"] {
-        width: 100%; /* Ocupa el 100% del contenedor padre */
+        width: 100%; 
         padding: 10px;
         margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 5px;
         resize: vertical;
         min-height: 80px;
-        box-sizing: border-box; /* Incluye padding y border en el width */
+        box-sizing: border-box;
     }
     .post-form input[type="text"] {
-        min-height: auto; /* Resetea el min-height para inputs */
+        min-height: auto; 
     }
     .post-form button {
-        width: 100%; /* El botón ocupa todo el ancho */
+        width: 100%; 
         padding: 12px;
         background-color: #28a745;
         color: white;
@@ -190,7 +178,6 @@
         background-color: #218838;
     }
 
-    /* --- Publicaciones Individuales (Post Card) --- */
     .post-card {
         background-color: #ffffff;
         border: 1px solid #e0e0e0;
@@ -201,22 +188,22 @@
     }
     .post-header {
         display: flex;
-        align-items: center; /* Alinea verticalmente la imagen, nombre y @usuario */
+        align-items: center; 
         margin-bottom: 15px;
     }
     .post-header .profile-picture {
-        width: 50px; /* Tamaño para la foto de perfil del post principal */
+        width: 50px; 
         height: 50px;
         border-radius: 50%;
         object-fit: cover;
         margin-right: 15px;
         border: 2px solid #ddd;
-        flex-shrink: 0; /* Evita que la imagen se encoja */
+        flex-shrink: 0; 
     }
     .post-author-info {
         display: flex;
-        flex-direction: column; /* Apila el nombre y el @usuario */
-        line-height: 1.2; /* Reduce el espacio entre líneas */
+        flex-direction: column; 
+        line-height: 1.2; 
     }
     .post-author-info strong {
         font-size: 1.1em;
@@ -236,7 +223,7 @@
         margin-bottom: 15px;
         line-height: 1.6;
         color: #444;
-        white-space: pre-wrap; /* Mantiene saltos de línea y espacios en el contenido */
+        white-space: pre-wrap; 
     }
     .post-media img,
     .post-media video {
@@ -244,7 +231,7 @@
         height: auto;
         border-radius: 5px;
         margin-top: 10px;
-        display: block; /* Para centrar si quieres, o solo para que ocupe su propia línea */
+        display: block; 
         margin-left: auto;
         margin-right: auto;
     }
@@ -261,14 +248,14 @@
     .post-actions {
         display: flex;
         gap: 10px;
-        align-items: center; /* Alinea los botones de like y eliminar */
+        align-items: center;
     }
     .like-info {
         display: flex;
         align-items: center;
         gap: 5px;
     }
-    .like-button, .delete-button { /* Estilos comunes para botones de acción */
+    .like-button, .delete-button { 
         padding: 5px 10px;
         border: none;
         border-radius: 4px;
@@ -284,12 +271,12 @@
         background-color: #5a6268;
     }
     .like-button.liked {
-        background-color: #ff4500; /* Naranja para "Me gusta" activo */
+        background-color: #ff4500; 
     }
     .like-button.liked:hover {
         background-color: #cc3700;
     }
-    .delete-button { /* Botón de eliminar post */
+    .delete-button { 
         background-color: #f44336;
         color: white;
     }
@@ -297,7 +284,6 @@
         background-color: #d32f2f;
     }
 
-    /* --- Sección de Comentarios (Comments Section) --- */
     .comments-section {
         border-top: 1px solid #eee;
         padding-top: 15px;
@@ -307,43 +293,42 @@
         margin-top: 0;
         margin-bottom: 15px;
         color: #555;
-        text-align: left; /* Título "Comentarios" alineado a la izquierda */
+        text-align: left; 
     }
 
-    /* Contenedor individual de cada comentario */
-    .comment { /* ¡Corregido! Ahora .comment tiene estilos */
+    .comment { 
         background-color: #fcfcfc;
         border: 1px solid #f0f0f0;
         border-radius: 6px;
         padding: 10px;
         margin-bottom: 10px;
-        display: flex; /* Para alinear la imagen y el texto del comentario */
-        flex-direction: column; /* Para apilar encabezado y contenido */
-        align-items: flex-start; /* Alinea los elementos a la izquierda */
+        display: flex; 
+        flex-direction: column; 
+        align-items: flex-start; 
     }
 
-    .comment-header { /* Encabezado de cada comentario */
+    .comment-header { 
         display: flex;
         align-items: center;
         margin-bottom: 5px;
-        width: 100%; /* Ocupa todo el ancho disponible */
+        width: 100%; 
     }
 
-    .comment-header .profile-picture-small { /* ¡Clase crucial para las fotos de perfil en comentarios! */
-        width: 30px; /* Tamaño más pequeño para los comentarios */
+    .comment-header .profile-picture-small {
+        width: 30px; 
         height: 30px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 8px; /* Espacio entre la imagen y el nombre/usuario */
+        margin-right: 8px; 
         border: 1px solid #ddd;
-        flex-shrink: 0; /* Evita que la imagen se encoja */
+        flex-shrink: 0; 
     }
 
-    .comment-header strong { /* Nombre del autor del comentario */
+    .comment-header strong { 
         font-weight: bold;
         color: #007bff;
         font-size: 0.9em;
-        line-height: 1.2; /* Ajuste de línea */
+        line-height: 1.2; 
     }
     .comment-header strong a {
         text-decoration: none;
@@ -353,41 +338,41 @@
         text-decoration: underline;
     }
 
-    .comment-header span { /* @username del comentario */
+    .comment-header span { 
         font-size: 0.8em;
         color: #666;
-        margin-left: 5px; /* Espacio entre nombre y @usuario */
+        margin-left: 5px; 
     }
 
-    .comment-meta { /* Fecha del comentario */
+    .comment-meta { 
         font-size: 0.75em;
         color: #999;
-        margin-left: auto; /* Empuja la fecha a la derecha en el header */
+        margin-left: auto; 
         flex-shrink: 0;
     }
 
-    .comment-content { /* Contenido textual del comentario */
+    .comment-content { 
         font-size: 0.9em;
         color: #555;
-        white-space: pre-wrap; /* Mantiene saltos de línea y espacios */
+        white-space: pre-wrap; 
         margin-bottom: 8px;
         margin-top: 5px;
         line-height: 1.5;
-        width: 100%; /* Asegura que ocupe todo el ancho */
-        padding-left: calc(30px + 8px); /* Sangría para alinear con el texto del encabezado */
+        width: 100%; 
+        padding-left: calc(30px + 8px); 
         box-sizing: border-box;
     }
 
-    .comment-actions { /* Contenedor de acciones del comentario (botón eliminar) */
+    .comment-actions { 
         text-align: right;
         width: 100%;
-        padding-left: calc(30px + 8px); /* Sangría para alinear con el texto */
+        padding-left: calc(30px + 8px); 
         box-sizing: border-box;
         margin-top: 5px;
     }
 
-    .comment-actions .delete-button { /* Botón de eliminar comentario (¡usando la misma clase!) */
-        background-color: #ffc107; /* Amarillo para eliminar comentario (por consistencia con tu original) */
+    .comment-actions .delete-button { 
+        background-color: #ffc107; 
         color: black;
         padding: 4px 8px;
         border: none;
@@ -400,7 +385,6 @@
         background-color: #e0a800;
     }
 
-    /* Formulario para añadir comentarios */
     .comment-form-container {
         margin-top: 20px;
         padding-top: 15px;
@@ -421,7 +405,7 @@
     }
     .comment-form button {
         padding: 8px 15px;
-        background-color: #17a2b8; /* Azul claro para el botón de comentar */
+        background-color: #17a2b8; 
         color: white;
         border: none;
         border-radius: 4px;

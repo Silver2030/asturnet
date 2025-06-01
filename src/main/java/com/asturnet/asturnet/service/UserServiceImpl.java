@@ -2,14 +2,14 @@ package com.asturnet.asturnet.service;
 
 import com.asturnet.asturnet.model.User;
 import com.asturnet.asturnet.model.PrivacyLevel;
-import com.asturnet.asturnet.repository.UserRepository; // Asegúrate de que esta importación exista
+import com.asturnet.asturnet.repository.UserRepository; 
 import com.asturnet.asturnet.dto.UserProfileUpdateRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional; // <-- ¡Importación necesaria para Optional!
+import java.util.Optional; 
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,13 +37,13 @@ public class UserServiceImpl implements UserService {
         newUser.setEmail(email);
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setBio("");
-        newUser.setFullName(""); // Inicializamos fullName
-        newUser.setProfilePictureUrl(""); // Inicializamos profilePictureUrl
+        newUser.setFullName(""); 
+        newUser.setProfilePictureUrl(""); 
 
         newUser.setPrivacyLevel(PrivacyLevel.PUBLIC);
-        newUser.setIsPrivate(false); // Es NOT NULL en la DB, inicializamos a false por defecto
-        newUser.setIsBanned(false); // Por defecto, no baneado al registrar
-        newUser.setRole("ROLE_USER"); // Por defecto, rol de usuario
+        newUser.setIsPrivate(false); 
+        newUser.setIsBanned(false); 
+        newUser.setRole("ROLE_USER"); 
 
         return userRepository.save(newUser);
     }
@@ -100,15 +100,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(query, query);
     }
 
-    // **NUEVOS MÉTODOS PARA EL BANEO AÑADIDOS AQUÍ**
-
     @Override
     @Transactional
     public void banUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
-        user.setIsBanned(true); // Establece el usuario como baneado
-        userRepository.save(user); // Guarda los cambios
+        user.setIsBanned(true); 
+        userRepository.save(user); 
     }
 
     @Override
@@ -116,7 +114,7 @@ public class UserServiceImpl implements UserService {
     public void unbanUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
-        user.setIsBanned(false); // Desbanea al usuario
+        user.setIsBanned(false);
         userRepository.save(user);
     }
 }

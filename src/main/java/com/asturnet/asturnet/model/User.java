@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections; // Para Collections.singletonList
+import java.util.Collections; 
 
 @Entity
 @Table(name = "users")
@@ -45,7 +45,7 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "privacy_level", nullable = false, length = 20)
-    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC; // Asumo que tienes este Enum
+    private PrivacyLevel privacyLevel = PrivacyLevel.PUBLIC; 
 
     @Column(name = "is_private", nullable = false)
     private Boolean isPrivate = false;
@@ -61,11 +61,9 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Tu campo de rol único
     @Column(nullable = false, length = 20)
     private String role = "ROLE_USER";
 
-    // Constructor con campos obligatorios
     public User(String username, String email, String password, String role) {
         this.username = username;
         this.email = email;
@@ -76,7 +74,6 @@ public class User implements UserDetails {
         this.privacyLevel = PrivacyLevel.PUBLIC;
     }
 
-    // --- Implementación de los métodos de UserDetails ---
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(this.role));

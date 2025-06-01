@@ -71,18 +71,19 @@ public class PostController {
 
             // Si el usuario actual es el propietario del post O si es un ADMIN
             if (post.getUser().getId().equals(user.getId()) || isAdmin()) {
-                postService.deletePost(postId, user); // El segundo 'user' podría ser solo para log, la eliminación no debería depender del 'user' si es admin
+                postService.deletePost(postId, user); 
                 redirectAttributes.addFlashAttribute("successMessage", "Publicación eliminada exitosamente!");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para eliminar esta publicación.");
             }
 
-        } catch (RuntimeException e) { // Podrías querer una excepción más específica aquí como PostNotFoundException
+        } catch (RuntimeException e) { 
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar publicación: " + e.getMessage());
         }
         return "redirect:/home";
     }
 
+    // Endpoint para la funcion de likes en los posts
     @PostMapping("/posts/toggleLike")
     public String toggleLike(@AuthenticationPrincipal UserDetails currentUser,
                              @RequestParam("postId") Long postId,
@@ -97,6 +98,7 @@ public class PostController {
         return "redirect:/home";
     }
 
+    // Endpoint para la creación de comentarios
     @PostMapping("/comments/create")
     public String createComment(@AuthenticationPrincipal UserDetails currentUser,
                                  @RequestParam("postId") Long postId,
@@ -113,35 +115,35 @@ public class PostController {
         return "redirect:/home";
     }
 
+    // Endpoint para remover comentarios
     @PostMapping("/comments/delete")
     public String deleteComment(@AuthenticationPrincipal UserDetails currentUser,
                                  @RequestParam("commentId") Long commentId,
                                  RedirectAttributes redirectAttributes) {
         try {
             User user = userService.findByUsername(currentUser.getUsername());
-            Comment comment = commentService.getCommentById(commentId); // Necesitas un método para obtener el comentario por ID
+            Comment comment = commentService.getCommentById(commentId); 
 
-            // --- Lógica de autorización mejorada ---
             // Si el usuario actual es el propietario del comentario O si es un ADMIN
             if (comment.getUser().getId().equals(user.getId()) || isAdmin()) {
-                commentService.deleteComment(commentId, user); // El segundo 'user' podría ser solo para log
+                commentService.deleteComment(commentId, user);
                 redirectAttributes.addFlashAttribute("successMessage", "Comentario eliminado exitosamente!");
             } else {
                 redirectAttributes.addFlashAttribute("errorMessage", "No tienes permiso para eliminar este comentario.");
             }
-            // --- Fin de la lógica de autorización mejorada ---
 
-        } catch (RuntimeException e) { // Podrías querer una excepción más específica aquí
+        } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar comentario: " + e.getMessage());
         }
         return "redirect:/home";
     }
 
+    // Endpoint para obtener un post en particular
     @GetMapping("/posts/{id}")
     public String viewPostDetails(@PathVariable Long id, Model model) {
         Post post = postService.getPostById(id);
 
         model.addAttribute("post", post);
-        return "post-details"; // Nombre de la nueva plantilla Thymeleaf
+        return "post-details"; 
     }
 }

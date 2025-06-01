@@ -13,11 +13,9 @@ import java.util.Optional;
 public class LikeServiceImpl implements LikeService {
 
     private final LikeRepository likeRepository;
-    private final PostService postService; // Necesitamos PostService para obtener el post por ID
 
-    public LikeServiceImpl(LikeRepository likeRepository, PostService postService) {
+    public LikeServiceImpl(LikeRepository likeRepository) {
         this.likeRepository = likeRepository;
-        this.postService = postService;
     }
 
     @Override
@@ -26,11 +24,9 @@ public class LikeServiceImpl implements LikeService {
         Optional<Like> existingLike = likeRepository.findByUserAndPost(user, post);
 
         if (existingLike.isPresent()) {
-            // Si el like ya existe, lo eliminamos (quitar like)
             likeRepository.delete(existingLike.get());
-            return null; // Indicamos que el like fue eliminado
+            return null; 
         } else {
-            // Si el like no existe, lo creamos (dar like)
             Like newLike = new Like();
             newLike.setUser(user);
             newLike.setPost(post);
